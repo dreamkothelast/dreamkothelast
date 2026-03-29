@@ -1,0 +1,10 @@
+{
+  "extends": "@parislivr/config/tsconfig",
+  "compilerOptions": {
+    "outDir": "dist",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["src"]
+}

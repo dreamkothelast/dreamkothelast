@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { addressSchema } from './address.js'
+import { addressSchema } from './address'
 
 export const packageInfoSchema = z.object({
   description: z.string().min(1).max(255),

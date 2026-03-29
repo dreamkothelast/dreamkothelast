@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { addressSchema } from './address.js'
+import { addressSchema } from './address'
 
 export const loginSchema = z.object({
   email: z.string().email('Email invalide'),

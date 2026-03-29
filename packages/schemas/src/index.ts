@@ -1,3 +1,3 @@
-export * from './address.js'
-export * from './auth.js'
-export * from './delivery.js'
+export * from './address'
+export * from './auth'
+export * from './delivery'

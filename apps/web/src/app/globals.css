@@ -1,15 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400;1,6..72,600&family=Public+Sans:wght@400;500;600;700&family=Albert+Sans:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-background text-on-background font-sans;
+  }
+}
+
 @layer components {
   .input {
-    @apply rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500;
+    @apply rounded border border-outline-variant bg-surface-container-low px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary font-sans;
   }
   .label {
-    @apply block text-sm font-medium text-gray-700;
+    @apply block text-sm font-medium text-on-surface-variant font-sans;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:opacity-50 transition-colors;
+    @apply inline-flex items-center justify-center rounded bg-primary px-5 py-2.5 font-semibold text-on-primary hover:opacity-90 disabled:opacity-50 transition-opacity shadow-hard font-sans;
+  }
+  .hard-shadow {
+    @apply shadow-hard;
+  }
+  .ledger-row {
+    @apply flex items-center justify-between py-3 border-b border-outline-variant last:border-0;
+  }
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
   }
 }

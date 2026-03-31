@@ -52,9 +52,9 @@ export default function CreateDeliveryForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border bg-white p-4 shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-hard">
       <fieldset>
-        <legend className="text-sm font-medium text-gray-700">Enlèvement</legend>
+        <legend className="label">Enlèvement</legend>
         <div className="mt-2 space-y-2">
           <input required placeholder="Rue" value={form.pickupStreet} onChange={set('pickupStreet')} className="input w-full" />
           <div className="flex gap-2">
@@ -65,7 +65,7 @@ export default function CreateDeliveryForm() {
       </fieldset>
 
       <fieldset>
-        <legend className="text-sm font-medium text-gray-700">Livraison</legend>
+        <legend className="label">Livraison</legend>
         <div className="mt-2 space-y-2">
           <input required placeholder="Rue" value={form.dropoffStreet} onChange={set('dropoffStreet')} className="input w-full" />
           <div className="flex gap-2">
@@ -76,12 +76,12 @@ export default function CreateDeliveryForm() {
       </fieldset>
 
       <fieldset>
-        <legend className="text-sm font-medium text-gray-700">Colis</legend>
+        <legend className="label">Colis</legend>
         <div className="mt-2 space-y-2">
           <input required placeholder="Description" value={form.description} onChange={set('description')} className="input w-full" maxLength={255} />
           <div className="flex gap-2 items-center">
             <input required type="number" placeholder="Poids (kg)" value={form.weightKg} onChange={set('weightKg')} className="input w-32" min="0.1" max="100" step="0.1" />
-            <label className="flex items-center gap-1.5 text-sm text-gray-600">
+            <label className="flex items-center gap-1.5 text-sm text-on-surface-variant">
               <input type="checkbox" checked={form.isFragile} onChange={set('isFragile')} className="rounded" />
               Fragile
             </label>
@@ -90,14 +90,14 @@ export default function CreateDeliveryForm() {
       </fieldset>
 
       <div>
-        <label className="text-sm font-medium text-gray-700">Prix proposé (€)</label>
+        <label className="label">Prix proposé (€)</label>
         <input required type="number" placeholder="Ex: 12.50" value={form.priceInCents} onChange={set('priceInCents')} className="input mt-1 w-full" min="1" step="0.01" />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {success && <p className="text-sm text-green-600">Livraison créée avec succès !</p>}
+      {error && <p className="text-sm text-on-primary-container bg-primary-container rounded px-3 py-2">{error}</p>}
+      {success && <p className="text-sm text-on-secondary-container bg-secondary-container rounded px-3 py-2">Livraison créée avec succès !</p>}
 
-      <button type="submit" disabled={submitting} className="w-full rounded-lg bg-brand-600 py-2 font-semibold text-white hover:bg-brand-700 disabled:opacity-50 transition-colors">
+      <button type="submit" disabled={submitting} className="btn-primary w-full">
         {submitting ? 'Envoi…' : 'Créer la livraison'}
       </button>
     </form>

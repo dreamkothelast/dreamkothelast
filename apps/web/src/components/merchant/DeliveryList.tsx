@@ -14,12 +14,12 @@ const STATUS_LABELS: Record<Delivery['status'], string> = {
 }
 
 const STATUS_COLORS: Record<Delivery['status'], string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  accepted: 'bg-blue-100 text-blue-800',
-  picked_up: 'bg-indigo-100 text-indigo-800',
-  in_transit: 'bg-purple-100 text-purple-800',
-  delivered: 'bg-green-100 text-green-800',
-  cancelled: 'bg-gray-100 text-gray-500',
+  pending: 'bg-tertiary-container text-on-tertiary-container',
+  accepted: 'bg-secondary-container text-on-secondary-container',
+  picked_up: 'bg-secondary-container text-on-secondary-container',
+  in_transit: 'bg-primary-container text-on-primary-container',
+  delivered: 'bg-secondary-container text-on-secondary-container',
+  cancelled: 'bg-surface-container text-on-surface-variant',
 }
 
 export default function DeliveryList() {
@@ -33,23 +33,23 @@ export default function DeliveryList() {
     })
   }, [])
 
-  if (loading) return <p className="text-gray-400">Chargement…</p>
-  if (deliveries.length === 0) return <p className="text-gray-400">Aucune livraison pour l'instant.</p>
+  if (loading) return <p className="text-on-surface-variant">Chargement…</p>
+  if (deliveries.length === 0) return <p className="text-on-surface-variant">Aucune livraison pour l&apos;instant.</p>
 
   return (
     <ul className="space-y-3">
       {deliveries.map((d) => (
-        <li key={d.id} className="rounded-lg border bg-white p-4 shadow-sm">
+        <li key={d.id} className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-hard-sm">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">{d.dropoff.street}, {d.dropoff.city}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{d.packageInfo.description}</p>
+              <p className="text-sm font-medium text-on-background">{d.dropoff.street}, {d.dropoff.city}</p>
+              <p className="text-xs text-on-surface-variant mt-0.5">{d.packageInfo.description}</p>
             </div>
             <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[d.status]}`}>
               {STATUS_LABELS[d.status]}
             </span>
           </div>
-          <p className="mt-2 text-xs text-gray-400">
+          <p className="mt-2 text-xs text-on-surface-variant font-numeric">
             {(d.priceInCents / 100).toFixed(2)} € · {new Date(d.createdAt).toLocaleDateString('fr-FR')}
           </p>
         </li>

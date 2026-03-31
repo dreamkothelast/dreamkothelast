@@ -20,8 +20,8 @@ export default function AvailabilityToggle() {
       disabled={loading}
       className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${
         available
-          ? 'bg-green-100 text-green-800 hover:bg-green-200'
-          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          ? 'bg-secondary-container text-on-secondary-container'
+          : 'bg-surface-container text-on-surface-variant'
       }`}
     >
       {available ? 'Disponible' : 'Indisponible'}

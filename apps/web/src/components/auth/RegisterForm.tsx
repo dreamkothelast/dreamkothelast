@@ -27,7 +27,7 @@ interface DriverFields extends BaseFields {
   firstName: string
   lastName: string
   vehicleType: 'bike' | 'scooter' | 'car' | 'van'
-  zonesInput: string // codes postaux séparés par virgules
+  zonesInput: string
 }
 
 const MERCHANT_INIT: MerchantFields = {
@@ -81,14 +81,14 @@ export default function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border bg-white p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-hard">
       {/* Tabs */}
-      <div className="mb-6 flex rounded-lg border p-1">
+      <div className="mb-6 flex rounded border border-outline-variant p-1">
         {(['merchant', 'driver'] as const).map((t) => (
           <button
             key={t} type="button" onClick={() => setTab(t)}
-            className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
-              tab === t ? 'bg-brand-600 text-white' : 'text-gray-500 hover:text-gray-700'
+            className={`flex-1 rounded py-2 text-sm font-medium transition-colors ${
+              tab === t ? 'bg-primary text-on-primary shadow-hard-sm' : 'text-on-surface-variant hover:text-on-background'
             }`}
           >
             {t === 'merchant' ? 'Commerçant' : 'Livreur'}
@@ -97,7 +97,6 @@ export default function RegisterForm() {
       </div>
 
       <div className="space-y-4">
-        {/* Champs communs */}
         <div>
           <label className="label">Email</label>
           <input type="email" required value={tab === 'merchant' ? merchant.email : driver.email}
@@ -119,7 +118,6 @@ export default function RegisterForm() {
           </div>
         </div>
 
-        {/* Champs spécifiques */}
         {tab === 'merchant' ? (
           <>
             <div>
@@ -168,13 +166,13 @@ export default function RegisterForm() {
               <label className="label">Zones couvertes (codes postaux, virgule séparés)</label>
               <input required value={driver.zonesInput} onChange={setD('zonesInput')} className="input mt-1 w-full"
                 placeholder="75001, 75002, 92100" />
-              <p className="mt-1 text-xs text-gray-400">Île-de-France uniquement</p>
+              <p className="mt-1 text-xs text-on-surface-variant">Île-de-France uniquement</p>
             </div>
           </>
         )}
       </div>
 
-      {error && <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p className="mt-4 rounded bg-primary-container px-3 py-2 text-sm text-on-primary-container">{error}</p>}
 
       <button type="submit" disabled={submitting} className="btn-primary mt-6 w-full">
         {submitting ? 'Création du compte…' : 'Créer mon compte'}

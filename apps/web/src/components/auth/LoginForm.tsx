@@ -34,7 +34,7 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border bg-white p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-hard">
       <div>
         <label className="label">Email</label>
         <input
@@ -53,7 +53,7 @@ export default function LoginForm() {
         />
       </div>
 
-      {error && <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p className="rounded bg-primary-container px-3 py-2 text-sm text-on-primary-container">{error}</p>}
 
       <button type="submit" disabled={submitting} className="btn-primary w-full">
         {submitting ? 'Connexion…' : 'Se connecter'}

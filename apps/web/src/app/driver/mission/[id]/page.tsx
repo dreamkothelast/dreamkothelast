@@ -44,10 +44,12 @@ const MOCK_MISSIONS: Record<string, {
   },
 }
 
-const DEFAULT_MISSION = MOCK_MISSIONS['1']
+export function generateStaticParams() {
+  return Object.keys(MOCK_MISSIONS).map((id) => ({ id }))
+}
 
 export default function MissionDetailsPage({ params }: { params: { id: string } }) {
-  const mission = MOCK_MISSIONS[params.id] ?? DEFAULT_MISSION
+  const mission = MOCK_MISSIONS[params.id] ?? MOCK_MISSIONS['1']!
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

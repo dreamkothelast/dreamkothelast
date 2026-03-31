@@ -37,7 +37,7 @@ const MOCK_MISSIONS: Record<string, {
     price: 18.0,
     isFragile: true,
     weightKg: 7.2,
-    contents: 'Bocaux confiture, huiles d'olive, épices',
+    contents: "Bocaux confiture, huiles d'olive, épices",
     notes: 'Colis fragiles — ne pas poser à plat.',
     pickup: { street: '8 rue des Francs-Bourgeois', city: 'Paris', zip: '75004' },
     dropoff: { street: '3 rue du Temple', city: 'Paris', zip: '75004' },

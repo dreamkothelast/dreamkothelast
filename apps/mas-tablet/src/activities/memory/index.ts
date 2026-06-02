@@ -4,7 +4,7 @@ import { MemoryActivity } from "./MemoryActivity";
 export const memoryActivity: ActivityDefinition = {
   id: "memory",
   title: "Les Paires",
-  icon: "🧩",
+  icon: "🃏",
   colors: {
     primary: "#FFA726",   // orange doux
     secondary: "#E65100", // orange profond

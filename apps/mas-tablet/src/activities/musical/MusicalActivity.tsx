@@ -15,21 +15,18 @@ const ENCOURAGEMENTS = [
   "Génial ! 🌟", "Magnifique ! 🎶", "Oui ! 🎵",
 ];
 
-// Longueur maximale de séquence par difficulté
 const MAX_LEN: Record<Difficulty, number> = {
   "cause-effet": 0,
   "facile": 5,
   "normal": 8,
 };
 
-// Longueur de départ
 const START_LEN: Record<Difficulty, number> = {
   "cause-effet": 0,
   "facile": 2,
   "normal": 3,
 };
 
-// Taps cause-effet avant célébration
 const CAUSE_EFFET_TARGET = 8;
 
 type GamePhase = "idle" | "watch" | "play";
@@ -46,9 +43,9 @@ export function MusicalActivity({
   const [sequence, setSequence] = useState<number[]>([]);
   const [activePad, setActivePad] = useState<number | null>(null);
   const [encouragement, setEncouragement] = useState("");
+  const [encKey, setEncKey] = useState(0);  // forcer la ré-animation du toast
   const [causeEffetTaps, setCauseEffetTaps] = useState(0);
 
-  // Refs pour valeurs mutables utilisées dans des callbacks asynchrones
   const seqRef = useRef<number[]>([]);
   const posRef = useRef(0);
   const busyRef = useRef(false);
@@ -58,6 +55,7 @@ export function MusicalActivity({
 
   const showEncouragement = useCallback((msg: string) => {
     if (encTimerRef.current) clearTimeout(encTimerRef.current);
+    setEncKey((k) => k + 1);
     setEncouragement(msg);
     encTimerRef.current = setTimeout(() => setEncouragement(""), 1600);
   }, []);
@@ -74,7 +72,6 @@ export function MusicalActivity({
     setTimeout(() => setActivePad(null), ms);
   }, []);
 
-  // Lit la séquence avec animation, puis passe en phase "play"
   const runSequence = useCallback(
     async (seq: number[]) => {
       busyRef.current = true;
@@ -118,7 +115,7 @@ export function MusicalActivity({
       if (busyRef.current) return;
       if (gamePhase === "idle" || gamePhase === "watch") return;
 
-      // ── Cause-effet : n'importe quel pad = récompense ──
+      // ── Cause-effet ──
       if (difficulty === "cause-effet") {
         playPadNote(padId);
         lightPad(padId, 520);
@@ -144,27 +141,26 @@ export function MusicalActivity({
         posRef.current = nextPos;
 
         if (nextPos >= seq.length) {
-          // Séquence complète !
           busyRef.current = true;
           playMatch();
           showEncouragement(ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)]);
 
           if (seq.length >= MAX_LEN[difficulty]) {
-            // Jeu terminé → célébration
             setTimeout(() => onCelebrate(), 1400);
             return;
           }
 
-          // Ajoute une note et rejoue
           const newPad = Math.floor(Math.random() * 4);
           const nextSeq = [...seq, newPad];
           setSequence(nextSeq);
           seqRef.current = nextSeq;
           setTimeout(() => runSequence(nextSeq), 1400);
+        } else {
+          // Correct mais pas fini : petit verrou anti-double-tap (100 ms)
+          busyRef.current = true;
+          setTimeout(() => { busyRef.current = false; }, 100);
         }
-        // sinon : tap correct, on attend le suivant
       } else {
-        // Mauvais pad — son doux, puis rejoue la séquence
         busyRef.current = true;
         lightPad(padId, 260);
         playSoft();
@@ -178,7 +174,6 @@ export function MusicalActivity({
     ]
   );
 
-  // Accès clavier / contacteur : touches 1-4 → pads 0-3
   useEffect(() => {
     if (gamePhase === "idle") return;
     const handler = (e: KeyboardEvent) => {
@@ -190,7 +185,6 @@ export function MusicalActivity({
     return () => window.removeEventListener("keydown", handler);
   }, [gamePhase, handlePadTap]);
 
-  // ── Texte d'instruction ──
   const instruction =
     gamePhase === "idle" ? "" :
     difficulty === "cause-effet" ? "Appuie sur n'importe quelle touche ! 🎵" :
@@ -201,7 +195,6 @@ export function MusicalActivity({
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full gap-8 px-8 py-6 select-none">
-      {/* Titre + instruction */}
       <div className="text-center">
         <h2 className="font-masque font-bold text-brun text-4xl">🎵 Jeu Musical</h2>
         {gamePhase !== "idle" && (
@@ -211,11 +204,9 @@ export function MusicalActivity({
         )}
       </div>
 
-      {/* Bouton démarrage ou grille de pads */}
       {gamePhase === "idle" ? (
         <button
           onClick={startGame}
-          // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
           className={[
             "font-masque font-bold text-white text-3xl px-16 py-8 rounded-[2rem]",
@@ -244,7 +235,6 @@ export function MusicalActivity({
                   "select-none cursor-pointer",
                   "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-brun",
                   disabled ? "cursor-default" : "active:scale-95 hover:brightness-110",
-                  "transition-all",
                 ].join(" ")}
                 style={{
                   backgroundColor: lit ? pad.colorLight : pad.colorDark,
@@ -265,17 +255,15 @@ export function MusicalActivity({
         </div>
       )}
 
-      {/* Toast d'encouragement */}
       {encouragement && (
         <div
-          key={encouragement + Date.now()}
+          key={encKey}
           className="font-masque font-bold text-brun text-3xl animate-[slide-up_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
         >
           {encouragement}
         </div>
       )}
 
-      {/* Points de progression — séquence */}
       {gamePhase !== "idle" && difficulty !== "cause-effet" && (
         <div className="flex gap-3 items-center">
           {Array.from({ length: maxLen }).map((_, i) => (
@@ -292,7 +280,6 @@ export function MusicalActivity({
         </div>
       )}
 
-      {/* Compteur cause-effet */}
       {gamePhase !== "idle" && difficulty === "cause-effet" && (
         <div className="flex gap-2 items-center">
           {Array.from({ length: CAUSE_EFFET_TARGET }).map((_, i) => (

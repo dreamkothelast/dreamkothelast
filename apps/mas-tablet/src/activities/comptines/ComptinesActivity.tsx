@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAudio } from "../../hooks/useAudio";
+import { useSpeech, hzToPitch } from "../../hooks/useSpeech";
 import type { ActivityProps } from "../../types";
 
 // ── Données des comptines ────────────────────────────────────────────────────
@@ -102,7 +103,8 @@ const BEAT_MS = 420;
 
 // ── Composant principal ───────────────────────────────────────────────────────
 export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: ActivityProps) {
-  const { playTone, resume } = useAudio(volume);
+  const { playTone, resume } = useAudio(volume * 0.5); // musique de fond plus discrète quand on chante
+  const { available, chanter, stop } = useSpeech(Math.min(1, volume + 0.25));
 
   const [view, setView] = useState<"list" | "playing">("list");
   const [current, setCurrent] = useState<Comptine | null>(null);
@@ -134,24 +136,48 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
 
   useEffect(() => () => {
     stopMusic();
+    stop();
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
-  }, [stopMusic]);
+  }, [stopMusic, stop]);
 
-  // ── Avancement automatique des lignes ─────────────────────────────────────
-  const scheduleAdvance = useCallback((comptine: Comptine, idx: number) => {
+  // Passe à la ligne suivante (ou termine la comptine)
+  const goToNext = useCallback((comptine: Comptine, idx: number) => {
+    const next = idx + 1;
+    if (next >= comptine.lines.length) {
+      stopMusic();
+      stop();
+      setTimeout(onCelebrate, 600);
+    } else {
+      setLineIdx(next);
+    }
+  }, [stopMusic, stop, onCelebrate]);
+
+  // ── Chante (ou lit) une ligne, puis avance ─────────────────────────────────
+  const performLine = useCallback((comptine: Comptine, idx: number) => {
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
-    lineTimerRef.current = setTimeout(() => {
-      const next = idx + 1;
-      if (next >= comptine.lines.length) {
-        stopMusic();
-        setTimeout(onCelebrate, 600);
-      } else {
-        playTone(523.2, 0.18, "sine", 0.7);
-        setLineIdx(next);
-        scheduleAdvance(comptine, next);
-      }
-    }, LINE_DURATION);
-  }, [stopMusic, onCelebrate, playTone]);
+
+    if (available) {
+      // Voix chantée : hauteur des mots calquée sur la mélodie de la comptine
+      const pitches = comptine.melody.map(hzToPitch);
+      chanter(comptine.lines[idx], pitches, {
+        rate: 0.82,
+        onEnd: () => {
+          // Petite respiration entre les lignes
+          lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), 650);
+        },
+      });
+    } else {
+      // Pas de voix dispo : avance au rythme du minuteur
+      lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), LINE_DURATION);
+    }
+  }, [available, chanter, goToNext]);
+
+  // Quand la ligne change pendant la lecture → on la chante
+  useEffect(() => {
+    if (view !== "playing" || !current || paused) return;
+    performLine(current, lineIdx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, current, lineIdx, paused]);
 
   // ── Démarrer une comptine ─────────────────────────────────────────────────
   const openComptine = useCallback((c: Comptine) => {
@@ -161,8 +187,8 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     setPaused(false);
     setView("playing");
     startMusic(c);
-    scheduleAdvance(c, 0);
-  }, [resume, startMusic, scheduleAdvance]);
+    // performLine est déclenché par l'effet ci-dessus
+  }, [resume, startMusic]);
 
   // ── Pause / Reprise ───────────────────────────────────────────────────────
   const togglePause = useCallback(() => {
@@ -170,36 +196,31 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     if (paused) {
       setPaused(false);
       startMusic(current);
-      scheduleAdvance(current, lineIdx);
+      performLine(current, lineIdx);
     } else {
       setPaused(true);
       stopMusic();
+      stop();
       if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
     }
-  }, [paused, current, lineIdx, startMusic, scheduleAdvance, stopMusic]);
+  }, [paused, current, lineIdx, startMusic, performLine, stopMusic, stop]);
 
   // ── Ligne suivante (manuelle) ─────────────────────────────────────────────
   const nextLine = useCallback(() => {
     if (!current || paused) return;
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
-    const next = lineIdx + 1;
-    if (next >= current.lines.length) {
-      stopMusic();
-      setTimeout(onCelebrate, 400);
-    } else {
-      playTone(523.2, 0.18, "sine", 0.7);
-      setLineIdx(next);
-      scheduleAdvance(current, next);
-    }
-  }, [current, paused, lineIdx, stopMusic, onCelebrate, playTone, scheduleAdvance]);
+    stop();
+    goToNext(current, lineIdx);
+  }, [current, paused, lineIdx, stop, goToNext]);
 
   // ── Retour à la liste ─────────────────────────────────────────────────────
   const goBack = useCallback(() => {
     stopMusic();
+    stop();
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
     setView("list");
     setCurrent(null);
-  }, [stopMusic]);
+  }, [stopMusic, stop]);
 
   // ── Vue : liste des comptines ─────────────────────────────────────────────
   if (view === "list") {
@@ -208,7 +229,11 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         <div className="text-center">
           <div className="text-7xl mb-2">🎵</div>
           <h2 className="font-masque font-bold text-brun text-4xl">Comptines</h2>
-          <p className="font-masque text-brun/60 text-xl mt-1">Choisis une chanson 👇</p>
+          <p className="font-masque text-brun/60 text-xl mt-1">
+            {available
+              ? "Une voix chante avec toi ! Choisis une chanson 👇"
+              : "Choisis une chanson 👇"}
+          </p>
         </div>
 
         <div className="grid grid-cols-3 gap-5 w-full max-w-[1100px]">
@@ -233,6 +258,13 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
             </button>
           ))}
         </div>
+
+        {!available && (
+          <p className="font-masque text-brun/40 text-base text-center max-w-[640px]">
+            💡 Pour que la voix chante, ajoutez une voix française dans Windows
+            (Paramètres → Heure et langue → Voix → Ajouter une voix : Français).
+          </p>
+        )}
       </div>
     );
   }

@@ -7,6 +7,7 @@ import { scenesActivity } from "./activities/scenes";
 import { douleurActivity } from "./activities/douleur";
 import { photosActivity } from "./activities/photos";
 import { comptinesActivity } from "./activities/comptines";
+import { histoiresActivity } from "./activities/histoires";
 
 export const ACTIVITIES: ActivityDefinition[] = [
   sensoryActivity,    // 🫧 Bulles Magiques
@@ -17,4 +18,5 @@ export const ACTIVITIES: ActivityDefinition[] = [
   douleurActivity,    // 🤗 Comment je me sens ?
   photosActivity,     // 📷 Mes Photos
   comptinesActivity,  // 🎵 Comptines
+  histoiresActivity,  // 📖 Histoires
 ];

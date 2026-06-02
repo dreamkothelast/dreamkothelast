@@ -5,7 +5,7 @@ const DEFAULT_SETTINGS: Settings = {
   volume: 0.7,
   intensity: "doux",
   timerDuration: 10,
-  difficulty: "cause-effet",
+  difficulty: "facile",
   reducedMotion: false,
   theme: "animaux",
 };

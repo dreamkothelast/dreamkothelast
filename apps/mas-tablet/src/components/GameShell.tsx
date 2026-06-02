@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { HomeButton } from "./HomeButton";
 import { SessionTimer } from "./SessionTimer";
 import type { TimerPhase } from "../hooks/useSessionTimer";
@@ -10,16 +10,9 @@ interface GameShellProps {
   timerLabel: string;
   timerPhase: TimerPhase;
   timerActive: boolean;
-  bgColor?: string;   // classe Tailwind ou chaîne CSS inline
+  bgColor?: string;
 }
 
-/**
- * Enveloppe commune à chaque activité.
- * Fournit : bouton Accueil, minuteur, zone d'accès au panneau accompagnant.
- *
- * Zone accompagnant : appui long 1,5 s sur le coin bas-droit (invisible).
- * Accessible aussi par Shift+F10 (alternative clavier).
- */
 export function GameShell({
   children,
   onHome,
@@ -29,26 +22,7 @@ export function GameShell({
   timerActive,
   bgColor = "bg-creme",
 }: GameShellProps) {
-  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hotZoneRef = useRef<HTMLDivElement>(null);
-
-  // Démarrage de l'appui long (tactile et souris)
-  const startLongPress = useCallback(() => {
-    longPressRef.current = setTimeout(() => {
-      onOpenCompanion();
-    }, 1500);
-  }, [onOpenCompanion]);
-
-  const cancelLongPress = useCallback(() => {
-    if (longPressRef.current !== null) {
-      clearTimeout(longPressRef.current);
-      longPressRef.current = null;
-    }
-  }, []);
-
-  // Raccourci clavier Shift+F10 pour l'accompagnant.
-  // Attaché au niveau document pour fonctionner quel que soit l'élément focusé
-  // (robuste pour l'accès clavier/contacteur, même juste après une navigation).
+  // Raccourci clavier Shift+F10 pour les accompagnants (clavier/contacteur)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === "F10") {
@@ -75,25 +49,25 @@ export function GameShell({
         {children}
       </div>
 
-      {/* Zone invisible bas-droit : déclencheur appui long accompagnant */}
-      <div
-        ref={hotZoneRef}
-        className="fixed bottom-0 right-0 w-[100px] h-[100px] z-40 cursor-pointer"
-        aria-hidden="true"
-        onMouseDown={startLongPress}
-        onMouseUp={cancelLongPress}
-        onMouseLeave={cancelLongPress}
-        onTouchStart={startLongPress}
-        onTouchEnd={cancelLongPress}
-        onTouchCancel={cancelLongPress}
-        role="none"
-      />
-
-      {/* Indicateur discret de la zone accompagnant */}
-      <div
-        className="fixed bottom-2 right-2 w-6 h-6 rounded-full bg-brun/10 pointer-events-none z-30"
-        aria-hidden="true"
-      />
+      {/* Bouton Réglages — bas-droit, toujours visible, grande cible tactile */}
+      <button
+        onClick={onOpenCompanion}
+        className={[
+          "fixed bottom-5 right-5 z-50",
+          "min-w-[84px] min-h-[84px] px-4 py-2",
+          "flex flex-col items-center justify-center gap-1",
+          "bg-creme border-4 border-brun/30 rounded-mas-xl shadow-tuile",
+          "font-masque font-bold text-brun text-base",
+          "cursor-pointer select-none",
+          "transition-all duration-200 active:scale-95",
+          "focus-visible:outline-none focus-visible:ring-[5px] focus-visible:ring-soleil",
+          "hover:brightness-105",
+        ].join(" ")}
+        aria-label="Ouvrir les réglages"
+      >
+        <span className="text-3xl leading-none" role="img" aria-hidden>⚙️</span>
+        <span className="text-sm leading-tight">Réglages</span>
+      </button>
     </div>
   );
 }

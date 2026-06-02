@@ -2,32 +2,40 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { pickItems, shuffle, type ImageItem } from "../../data/imageSets";
 import type { ActivityProps, ImageTheme } from "../../types";
+import type { Difficulty } from "../../types";
 
-// Mappe le contrat ActivityProps (theme requis) avec les helpers de ce fichier.
-
-// Petite mascotte simplifiée pour le dos des cartes — cohérence affective.
-// Le même visage souriant accueille l'enfant/adulte sur chaque carte cachée.
+// Dos de carte coloré et reconnaissable — gradient bleu-violet + étoiles
 function CardBackFace() {
   return (
-    <svg viewBox="0 0 100 100" className="w-1/2 h-1/2" aria-hidden="true">
-      <circle cx="50" cy="50" r="34" fill="#FFE88C" stroke="#4A3B2F" strokeWidth="4" />
-      <circle cx="40" cy="46" r="5" fill="#4A3B2F" />
-      <circle cx="60" cy="46" r="5" fill="#4A3B2F" />
-      <ellipse cx="32" cy="56" rx="6" ry="4" fill="#FF7A6B" opacity="0.5" />
-      <ellipse cx="68" cy="56" rx="6" ry="4" fill="#FF7A6B" opacity="0.5" />
-      <path d="M 38 60 Q 50 70 62 60" stroke="#4A3B2F" strokeWidth="4" fill="none" strokeLinecap="round" />
-    </svg>
+    <div
+      className="w-full h-full flex items-center justify-center relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #1565C0 0%, #6A1B9A 100%)",
+      }}
+    >
+      {/* Étoiles aux coins */}
+      <span className="absolute top-[10%] left-[10%] text-[clamp(0.8rem,2.5vw,1.4rem)] opacity-70" aria-hidden>⭐</span>
+      <span className="absolute top-[10%] right-[10%] text-[clamp(0.8rem,2.5vw,1.4rem)] opacity-70" aria-hidden>⭐</span>
+      <span className="absolute bottom-[10%] left-[10%] text-[clamp(0.8rem,2.5vw,1.4rem)] opacity-70" aria-hidden>⭐</span>
+      <span className="absolute bottom-[10%] right-[10%] text-[clamp(0.8rem,2.5vw,1.4rem)] opacity-70" aria-hidden>⭐</span>
+      {/* Centre */}
+      <span
+        className="text-[clamp(2rem,8vw,4.5rem)] leading-none select-none"
+        role="img"
+        aria-hidden
+        style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))" }}
+      >
+        ❓
+      </span>
+    </div>
   );
 }
 
-// Encouragements doux affichés à chaque réussite (renforcement positif).
 const ENCOURAGEMENTS = ["Bravo !", "Super !", "Bien joué !", "Génial !", "Magnifique !", "Oui !"];
 
-// Configuration de grille selon la difficulté.
-function gridConfig(difficulty: ActivityProps["difficulty"]) {
+function gridConfig(difficulty: Difficulty) {
   switch (difficulty) {
     case "cause-effet":
-      // Mode cause à effet : 4 cartes, aucune notion de paire, chaque carte est une récompense.
       return { cols: 2, rows: 2, pairs: 2, causeEffet: true };
     case "facile":
       return { cols: 3, rows: 2, pairs: 3, causeEffet: false };
@@ -37,23 +45,26 @@ function gridConfig(difficulty: ActivityProps["difficulty"]) {
   }
 }
 
+const DIFF_LABELS: { key: Difficulty; label: string; icon: string }[] = [
+  { key: "cause-effet", label: "Découverte", icon: "👆" },
+  { key: "facile",      label: "Facile",     icon: "🌟" },
+  { key: "normal",      label: "Normal",     icon: "🧠" },
+];
+
 interface Card {
-  key: number;        // identité unique de l'emplacement
-  itemId: string;     // identifiant de l'image (les paires partagent le même)
+  key: number;
+  itemId: string;
   emoji: string;
   label: string;
-  flipped: boolean;   // face visible
-  matched: boolean;   // appariée (reste visible, halo vert)
+  flipped: boolean;
+  matched: boolean;
 }
 
-// Construit le paquet de cartes mélangé.
 function buildDeck(theme: ImageTheme, cfg: ReturnType<typeof gridConfig>): Card[] {
   let items: ImageItem[];
   if (cfg.causeEffet) {
-    // Cause-effet : 4 images distinctes (pas besoin de paires)
     items = pickItems(theme, cfg.cols * cfg.rows);
   } else {
-    // Mode paires : on prend `pairs` images, on les double
     const base = pickItems(theme, cfg.pairs);
     items = shuffle([...base, ...base]);
   }
@@ -67,17 +78,6 @@ function buildDeck(theme: ImageTheme, cfg: ReturnType<typeof gridConfig>): Card[
   }));
 }
 
-/**
- * Jeu Les Paires (Memory) — accessible, sans échec, sans score compétitif.
- *
- * • Cause-effet : chaque carte touchée se retourne et récompense (pas de paires).
- * • Facile / Normal : vraies paires, avec temps d'observation au départ.
- *   Erreur = son doux + on rejoue. Réussite = son joyeux + halo + encouragement.
- * • Fin = écran de célébration (onCelebrate).
- *
- * Accessibilité : chaque carte est un bouton focusable et ordonné (tabIndex),
- * activable au clavier/contacteur (Espace/Entrée), focus très visible.
- */
 export function MemoryActivity({
   difficulty,
   intensity,
@@ -86,25 +86,49 @@ export function MemoryActivity({
   volume = 0.7,
   onCelebrate,
 }: ActivityProps) {
-  const cfg = useMemo(() => gridConfig(difficulty), [difficulty]);
-  const [deck, setDeck] = useState<Card[]>(() => buildDeck(theme, cfg));
+  // Difficulté locale — peut être changée en-jeu sans quitter l'activité
+  const [localDiff, setLocalDiff] = useState<Difficulty>(difficulty);
 
-  // "preview" = observation initiale, "play" = jouable
+  const cfg = useMemo(() => gridConfig(localDiff), [localDiff]);
+  const [deck, setDeck] = useState<Card[]>(() => buildDeck(theme, gridConfig(localDiff)));
+
   const [phase, setPhase] = useState<"preview" | "play">("preview");
-  const [picks, setPicks] = useState<number[]>([]);   // indices retournés en attente
+  const [picks, setPicks] = useState<number[]>([]);
   const [locked, setLocked] = useState(false);
   const [toast, setToast] = useState<{ text: string; key: number } | null>(null);
   const toastCounter = useRef(0);
 
   const { playMatch, playSoft, playFlip, resume } = useAudio(volume);
 
-  // Durée d'animation selon réglages
   const flipDur = reducedMotion ? 0 : intensity === "vif" ? 320 : 480;
+  const previewMs = reducedMotion ? 600 : cfg.causeEffet ? 0 : localDiff === "facile" ? 2600 : 2200;
 
-  // Durée d'observation initiale (plus longue en facile, courte/absente en cause-effet)
-  const previewMs = reducedMotion ? 600 : cfg.causeEffet ? 0 : difficulty === "facile" ? 2600 : 2200;
+  // Reconstruction du jeu quand la difficulté locale change
+  const startWithDifficulty = useCallback((diff: Difficulty) => {
+    const newCfg = gridConfig(diff);
+    const newDeck = buildDeck(theme, newCfg);
+    setLocalDiff(diff);
+    setDeck(newDeck);
+    setPicks([]);
+    setLocked(false);
+    setToast(null);
 
-  // Phase d'observation : montrer toutes les cartes puis les retourner.
+    if (newCfg.causeEffet) {
+      setPhase("play");
+    } else {
+      setPhase("preview");
+      const previewDur = reducedMotion ? 600 : diff === "facile" ? 2600 : 2200;
+      // Montre les cartes puis les cache
+      setDeck(newDeck.map((c) => ({ ...c, flipped: true })));
+      const t = setTimeout(() => {
+        setDeck(newDeck.map((c) => ({ ...c, flipped: false })));
+        setPhase("play");
+      }, previewDur);
+      return () => clearTimeout(t);
+    }
+  }, [theme, reducedMotion]);
+
+  // Phase d'observation initiale au premier rendu
   useEffect(() => {
     if (cfg.causeEffet || previewMs === 0) {
       setPhase("play");
@@ -120,34 +144,27 @@ export function MemoryActivity({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Affiche un encouragement flottant
   const showToast = useCallback((text: string) => {
     toastCounter.current += 1;
     setToast({ text, key: toastCounter.current });
   }, []);
 
-  // Effacement automatique du toast
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 1200);
     return () => clearTimeout(t);
   }, [toast]);
 
-  // Vérifie la fin de partie (toutes cartes appariées/révélées) → célébration
   const checkWin = useCallback(
     (next: Card[]) => {
       const done = cfg.causeEffet
         ? next.every((c) => c.flipped)
         : next.every((c) => c.matched);
-      if (done) {
-        // Petit délai pour savourer la dernière réussite avant la célébration
-        setTimeout(() => onCelebrate(), 900);
-      }
+      if (done) setTimeout(() => onCelebrate(), 900);
     },
     [cfg.causeEffet, onCelebrate]
   );
 
-  // ── Gestion du clic sur une carte ───────────────────────────
   const handleCardClick = useCallback(
     (index: number) => {
       resume();
@@ -155,7 +172,6 @@ export function MemoryActivity({
       const card = deck[index];
       if (card.flipped || card.matched) return;
 
-      // ─ Mode cause à effet : chaque carte est une récompense ─
       if (cfg.causeEffet) {
         playMatch();
         showToast(ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)]);
@@ -167,7 +183,6 @@ export function MemoryActivity({
         return;
       }
 
-      // ─ Mode paires ─
       playFlip();
       const flippedDeck = deck.map((c, i) => (i === index ? { ...c, flipped: true } : c));
       setDeck(flippedDeck);
@@ -178,13 +193,11 @@ export function MemoryActivity({
         return;
       }
 
-      // Deux cartes retournées : on évalue
       setLocked(true);
       const [a, b] = nextPicks;
       const isMatch = flippedDeck[a].itemId === flippedDeck[b].itemId;
 
       if (isMatch) {
-        // Réussite : son joyeux + encouragement + halo, les cartes restent
         setTimeout(() => {
           playMatch();
           showToast(ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)]);
@@ -197,7 +210,6 @@ export function MemoryActivity({
           checkWin(matched);
         }, 350);
       } else {
-        // Pas de correspondance : son doux, on retourne en douceur (aucune pénalité)
         setTimeout(() => {
           playSoft();
           setTimeout(() => {
@@ -213,21 +225,42 @@ export function MemoryActivity({
     [phase, locked, deck, picks, cfg.causeEffet, playMatch, playFlip, playSoft, resume, showToast, checkWin]
   );
 
-  // Taille de carte responsive selon la grille : plus la grille est petite,
-  // plus les cartes sont grandes (généreux pour les niveaux les plus simples).
-  const gapClass = cfg.cols >= 4 ? "gap-4" : "gap-8";
+  const gapClass = cfg.cols >= 4 ? "gap-4" : "gap-6";
   const cardSize =
     cfg.cols <= 2
-      ? "clamp(140px, 26vw, 260px)"
+      ? "clamp(150px, 28vw, 280px)"
       : cfg.cols === 3
-      ? "clamp(110px, 20vw, 200px)"
-      : "clamp(80px, 15vw, 160px)";
+      ? "clamp(120px, 20vw, 220px)"
+      : "clamp(90px, 15vw, 170px)";
 
   return (
-    <div className="relative flex-1 flex flex-col items-center justify-center w-full h-full px-6 py-4 bg-gradient-to-b from-[#FFF1D6] to-[#FFF6E9]">
-      {/* Consigne / phase d'observation */}
-      <div className="absolute top-6 left-0 right-0 flex justify-center pointer-events-none z-10">
-        <p className="font-masque text-brun/60 text-2xl select-none text-center">
+    <div className="relative flex-1 flex flex-col items-center w-full h-full px-6 pb-6 pt-3 bg-gradient-to-b from-[#FFF1D6] to-[#FFF6E9]">
+
+      {/* Sélecteur de difficulté en haut */}
+      <div className="flex gap-3 mb-4 z-10">
+        {DIFF_LABELS.map(({ key, label, icon }) => (
+          <button
+            key={key}
+            onClick={() => startWithDifficulty(key)}
+            className={[
+              "font-masque font-bold text-base px-5 py-3 rounded-[1.5rem]",
+              "min-h-[52px] select-none cursor-pointer",
+              "transition-all duration-200 active:scale-95",
+              "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun",
+              localDiff === key
+                ? "bg-brun text-creme shadow-[0_4px_12px_rgba(0,0,0,0.3)] scale-[1.04]"
+                : "bg-creme/80 text-brun/70 border-2 border-brun/20 hover:bg-creme",
+            ].join(" ")}
+            aria-pressed={localDiff === key}
+          >
+            {icon} {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Consigne */}
+      <div className="mb-4 pointer-events-none z-10">
+        <p className="font-masque text-brun/60 text-xl select-none text-center">
           {phase === "preview"
             ? "👀 Regarde bien les images…"
             : cfg.causeEffet
@@ -236,78 +269,87 @@ export function MemoryActivity({
         </p>
       </div>
 
-      {/* Grille de cartes */}
-      <div
-        className={`grid ${gapClass} place-items-center`}
-        style={{
-          gridTemplateColumns: `repeat(${cfg.cols}, minmax(0, 1fr))`,
-          // Largeur max pour garder de grandes cartes lisibles
-          maxWidth: cfg.cols >= 4 ? "min(90vw, 900px)" : "min(80vw, 680px)",
-        }}
-        role="grid"
-        aria-label="Cartes du jeu Les Paires"
-      >
-        {deck.map((card, i) => {
-          const showFace = card.flipped || card.matched;
-          return (
-            <button
-              key={card.key}
-              role="gridcell"
-              tabIndex={i + 1}
-              onClick={() => handleCardClick(i)}
-              disabled={card.matched && !cfg.causeEffet}
-              aria-label={
-                showFace ? card.label : `Carte ${i + 1}, cachée`
-              }
-              style={{ width: cardSize }}
-              className={[
-                "mas-flip-card relative select-none cursor-pointer aspect-square",
-                "rounded-mas-xl transition-transform duration-200",
-                "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-brun focus-visible:ring-offset-2 focus-visible:ring-offset-creme",
-                card.matched ? "scale-[1.02]" : "hover:scale-[1.04] active:scale-95",
-              ].join(" ")}
-            >
-              <div
-                className={`mas-flip-inner ${showFace ? "is-flipped" : ""}`}
-                style={{ ["--flip-dur" as string]: `${flipDur}ms` }}
+      {/* Grille de cartes — centrée, occupe l'espace disponible */}
+      <div className="flex-1 flex items-center justify-center w-full">
+        <div
+          className={`grid ${gapClass} place-items-center`}
+          style={{
+            gridTemplateColumns: `repeat(${cfg.cols}, minmax(0, 1fr))`,
+            maxWidth: cfg.cols >= 4 ? "min(90vw, 920px)" : "min(80vw, 720px)",
+          }}
+          role="grid"
+          aria-label="Cartes du jeu Les Paires"
+        >
+          {deck.map((card, i) => {
+            const showFace = card.flipped || card.matched;
+            return (
+              <button
+                key={card.key}
+                role="gridcell"
+                tabIndex={i + 1}
+                onClick={() => handleCardClick(i)}
+                disabled={card.matched && !cfg.causeEffet}
+                aria-label={showFace ? card.label : `Carte ${i + 1}, cachée`}
+                style={{ width: cardSize }}
+                className={[
+                  "mas-flip-card relative select-none cursor-pointer aspect-square",
+                  "rounded-[1.5rem] transition-transform duration-200",
+                  "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-brun focus-visible:ring-offset-2 focus-visible:ring-offset-creme",
+                  card.matched ? "scale-[1.02]" : "hover:scale-[1.05] active:scale-95",
+                ].join(" ")}
               >
-                {/* Dos de la carte (visage souriant) */}
                 <div
-                  className={[
-                    "mas-flip-face rounded-mas-xl border-4 border-ciel-fonce shadow-tuile",
-                    "bg-gradient-to-br from-ciel-clair to-ciel",
-                  ].join(" ")}
+                  className={`mas-flip-inner ${showFace ? "is-flipped" : ""}`}
+                  style={{ ["--flip-dur" as string]: `${flipDur}ms` }}
                 >
-                  <CardBackFace />
-                </div>
+                  {/* Dos de carte */}
+                  <div
+                    className={[
+                      "mas-flip-face rounded-[1.5rem] overflow-hidden",
+                      "border-4 border-[#1565C0]/60 shadow-tuile",
+                    ].join(" ")}
+                  >
+                    <CardBackFace />
+                  </div>
 
-                {/* Face avant (image) */}
-                <div
-                  className={[
-                    "mas-flip-face mas-flip-face--back rounded-mas-xl border-4 shadow-tuile",
-                    card.matched
-                      ? "bg-vert-clair border-vert"
-                      : "bg-creme border-soleil",
-                  ].join(" ")}
-                >
-                  <span className="text-[clamp(2.5rem,9vw,5rem)] leading-none" role="img" aria-hidden="true">
-                    {card.emoji}
-                  </span>
-
-                  {/* Halo / étincelle de réussite */}
-                  {card.matched && !reducedMotion && (
-                    <span className="absolute -top-2 -right-2 text-3xl motion-safe:animate-[wiggle_0.6s_ease-in-out]" aria-hidden>
-                      ✨
+                  {/* Face avant */}
+                  <div
+                    className={[
+                      "mas-flip-face mas-flip-face--back rounded-[1.5rem] border-4 shadow-tuile",
+                      "flex flex-col items-center justify-center gap-2",
+                      card.matched
+                        ? "bg-vert-clair border-vert"
+                        : "bg-creme border-soleil",
+                    ].join(" ")}
+                  >
+                    <span
+                      className="text-[clamp(2.5rem,10vw,5.5rem)] leading-none"
+                      role="img"
+                      aria-hidden="true"
+                    >
+                      {card.emoji}
                     </span>
-                  )}
+                    <span className="font-masque font-bold text-brun text-[clamp(0.75rem,1.8vw,1.1rem)] leading-tight px-2 text-center">
+                      {card.label}
+                    </span>
+
+                    {card.matched && !reducedMotion && (
+                      <span
+                        className="absolute -top-2 -right-2 text-3xl motion-safe:animate-[wiggle_0.6s_ease-in-out]"
+                        aria-hidden
+                      >
+                        ✨
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Encouragement flottant */}
+      {/* Toast d'encouragement */}
       {toast && (
         <div
           key={toast.key}

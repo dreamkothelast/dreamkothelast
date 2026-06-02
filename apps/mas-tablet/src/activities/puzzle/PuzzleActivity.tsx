@@ -1,22 +1,18 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { useAudio } from "../../hooks/useAudio";
-import { PUZZLE_IMAGES, pickRandomImage } from "../../data/puzzleImages";
+import { pickRandomImage } from "../../data/puzzleImages";
 import type { ActivityProps, Difficulty } from "../../types";
 import type { PuzzleImage } from "../../data/puzzleImages";
 
-// Grille selon difficulté
+// Grille par difficulté
 const GRID: Record<Difficulty, { cols: number; rows: number }> = {
   "cause-effet": { cols: 2, rows: 2 },
-  "facile":      { cols: 3, rows: 2 },
-  "normal":      { cols: 3, rows: 3 },
+  "facile":      { cols: 3, rows: 3 },
+  "normal":      { cols: 4, rows: 4 },
 };
 
-// Taille de l'image puzzle (px) — adaptée selon le nombre de pièces
-const PUZZLE_SIZE: Record<Difficulty, number> = {
-  "cause-effet": 360,
-  "facile":      390,
-  "normal":      405,
-};
+// Taille totale du puzzle (px) — grande et centrée sur 1920×1080
+const PUZZLE_SIZE = 600;
 
 const ENCOURAGEMENTS = [
   "Bravo ! 🎉", "Super ! ⭐", "Bien joué ! 👏",
@@ -24,11 +20,6 @@ const ENCOURAGEMENTS = [
 ];
 
 type Phase = "idle" | "preview" | "playing" | "solved" | "revealed";
-
-interface PieceInfo {
-  pieceIdx: number;   // position correcte dans la grille (row * cols + col)
-  placed: boolean;    // cette pièce est posée au bon endroit
-}
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -39,66 +30,57 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/** Convertit un SVG string en data URL */
 function svgToDataUrl(svg: string): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
+// ── Pièce dans le bac ────────────────────────────────────────────────────────
 interface PieceProps {
   pieceIdx: number;
   cols: number;
   rows: number;
   imgUrl: string;
-  size: number;
+  pieceW: number;
+  pieceH: number;
+  traySize: number;
   selected: boolean;
-  placed: boolean;
   reducedMotion: boolean;
   onClick: () => void;
 }
 
-/** Une pièce du puzzle — montre la bonne portion de l'image via background-position */
-function PuzzlePiece({
-  pieceIdx,
-  cols,
-  rows,
-  imgUrl,
-  size,
-  selected,
-  placed,
-  reducedMotion,
-  onClick,
+function TrayPiece({
+  pieceIdx, cols, rows, imgUrl, pieceW, pieceH, traySize,
+  selected, reducedMotion, onClick,
 }: PieceProps) {
   const col = pieceIdx % cols;
   const row = Math.floor(pieceIdx / cols);
-
-  // background-position en % (formule CSS background-position)
   const bgPosX = cols > 1 ? (col / (cols - 1)) * 100 : 0;
   const bgPosY = rows > 1 ? (row / (rows - 1)) * 100 : 0;
 
-  const pieceW = Math.floor(size / cols);
-  const pieceH = Math.floor(size / rows);
+  // background-size fills the piece at correct scale relative to tray size
+  const scaleX = traySize / pieceW;
+  const scaleY = traySize / pieceH;
+  const bgW = PUZZLE_SIZE * scaleX;
+  const bgH = PUZZLE_SIZE * scaleY;
 
   return (
     <button
       onClick={onClick}
-      disabled={placed}
       aria-label={`Pièce ${pieceIdx + 1}`}
       aria-pressed={selected}
       className={[
-        "overflow-hidden rounded-lg border-2 cursor-pointer",
+        "flex-shrink-0 overflow-hidden rounded-xl border-4 cursor-pointer",
         "transition-all select-none",
-        "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun",
-        placed
-          ? "opacity-0 pointer-events-none"
-          : selected
-          ? "border-soleil scale-105 shadow-[0_0_16px_4px_rgba(255,210,63,0.7)]"
-          : "border-white/60 hover:border-white hover:scale-105 active:scale-95",
+        "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white",
+        selected
+          ? "border-yellow-300 scale-110 shadow-[0_0_20px_6px_rgba(255,220,50,0.8)] z-10"
+          : "border-white/50 hover:border-white hover:scale-105 active:scale-95",
       ].join(" ")}
       style={{
-        width: pieceW,
-        height: pieceH,
+        width: traySize,
+        height: traySize,
         backgroundImage: `url(${imgUrl})`,
-        backgroundSize: `${cols * 100}% ${rows * 100}%`,
+        backgroundSize: `${bgW}px ${bgH}px`,
         backgroundPosition: `${bgPosX}% ${bgPosY}%`,
         backgroundRepeat: "no-repeat",
         transition: reducedMotion ? "none" : undefined,
@@ -107,59 +89,44 @@ function PuzzlePiece({
   );
 }
 
+// ── Case dans la grille ───────────────────────────────────────────────────────
 interface SlotProps {
   slotIdx: number;
   cols: number;
   rows: number;
   imgUrl: string;
-  size: number;
-  filledPieceIdx: number | null;  // quel pieceIdx est posé ici (-1 si vide)
+  pieceW: number;
+  pieceH: number;
+  filledPieceIdx: number | null;
   correct: boolean;
-  selected: boolean;
-  difficulty: Difficulty;
   reducedMotion: boolean;
   onClick: () => void;
 }
 
-/** Un emplacement vide dans la grille puzzle */
 function PuzzleSlot({
-  slotIdx,
-  cols,
-  rows,
-  imgUrl,
-  size,
-  filledPieceIdx,
-  correct,
-  selected,
-  reducedMotion,
-  onClick,
+  slotIdx, cols, rows, imgUrl, pieceW, pieceH,
+  filledPieceIdx, correct, reducedMotion, onClick,
 }: SlotProps) {
   const col = slotIdx % cols;
   const row = Math.floor(slotIdx / cols);
-
   const bgPosX = cols > 1 ? (col / (cols - 1)) * 100 : 0;
   const bgPosY = rows > 1 ? (row / (rows - 1)) * 100 : 0;
-
-  const pieceW = Math.floor(size / cols);
-  const pieceH = Math.floor(size / rows);
 
   const isEmpty = filledPieceIdx === null;
 
   return (
     <button
       onClick={onClick}
-      aria-label={`Emplacement ${slotIdx + 1}`}
+      aria-label={`Emplacement ${slotIdx + 1}${correct ? " — correct" : ""}`}
       className={[
-        "overflow-hidden rounded-lg border-2 cursor-pointer",
+        "overflow-hidden rounded-xl border-4 cursor-pointer",
         "transition-all select-none",
-        "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun",
+        "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white",
         correct
-          ? "border-vert shadow-[0_0_12px_4px_rgba(143,217,75,0.6)]"
+          ? "border-green-400 shadow-[0_0_16px_4px_rgba(74,222,128,0.7)] cursor-default"
           : isEmpty
-          ? "border-white/25 bg-white/10 hover:border-white/50"
-          : selected
-          ? "border-soleil"
-          : "border-white/40 hover:border-white/70",
+          ? "border-white/20 bg-white/8 hover:border-white/50 hover:bg-white/15"
+          : "border-yellow-300/60 hover:border-white/70",
       ].join(" ")}
       style={{
         width: pieceW,
@@ -168,13 +135,14 @@ function PuzzleSlot({
         backgroundSize: !isEmpty ? `${cols * 100}% ${rows * 100}%` : undefined,
         backgroundPosition: !isEmpty ? `${bgPosX}% ${bgPosY}%` : undefined,
         backgroundRepeat: "no-repeat",
-        opacity: !isEmpty && !correct ? 0.5 : 1,
+        opacity: !isEmpty && !correct ? 0.55 : 1,
         transition: reducedMotion ? "none" : undefined,
       }}
     />
   );
 }
 
+// ── Composant principal ───────────────────────────────────────────────────────
 export function PuzzleActivity({
   difficulty,
   reducedMotion,
@@ -185,13 +153,19 @@ export function PuzzleActivity({
 
   const { cols, rows } = GRID[difficulty];
   const totalPieces = cols * rows;
-  const puzzleSize = PUZZLE_SIZE[difficulty];
+
+  // Dimensions de chaque pièce dans la grille
+  const pieceW = Math.floor(PUZZLE_SIZE / cols);
+  const pieceH = Math.floor(PUZZLE_SIZE / rows);
+
+  // Taille des pièces dans le bac (75% de la taille de pièce, min 100px)
+  const trayPieceSize = Math.max(100, Math.floor(Math.min(pieceW, pieceH) * 0.75));
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [currentImage, setCurrentImage] = useState<PuzzleImage>(() => pickRandomImage());
-  const [trayOrder, setTrayOrder] = useState<number[]>([]);  // pieceIdx dans le bac
-  const [slots, setSlots] = useState<(number | null)[]>([]);  // slot → pieceIdx posé
-  const [selectedPieceIdx, setSelectedPieceIdx] = useState<number | null>(null); // pièce sélectionnée dans le bac
+  const [trayOrder, setTrayOrder] = useState<number[]>([]);
+  const [slots, setSlots] = useState<(number | null)[]>([]);
+  const [selectedPieceIdx, setSelectedPieceIdx] = useState<number | null>(null);
   const [correctSlots, setCorrectSlots] = useState<boolean[]>([]);
   const [encouragement, setEncouragement] = useState("");
   const [encKey, setEncKey] = useState(0);
@@ -211,15 +185,12 @@ export function PuzzleActivity({
     const pieces = Array.from({ length: totalPieces }, (_, i) => i);
 
     if (difficulty === "cause-effet") {
-      // Cause-effet : les pièces sont dans la grille, mais retournées (cachées)
-      // Tapper une pièce la révèle à sa bonne place
-      setSlots(pieces.map((_, i) => i));      // slots déjà "remplis"
+      setSlots(pieces.map((_, i) => i));
       setCorrectSlots(new Array(totalPieces).fill(false));
       setTrayOrder([]);
       setSelectedPieceIdx(null);
       setPhase("playing");
     } else {
-      // Facile / Normal : pièces mélangées dans le bac
       setTrayOrder(shuffle(pieces));
       setSlots(new Array(totalPieces).fill(null));
       setCorrectSlots(new Array(totalPieces).fill(false));
@@ -228,141 +199,119 @@ export function PuzzleActivity({
     }
   }, [difficulty, totalPieces]);
 
-  // Démarrer avec une preview 2 s
   const startGame = useCallback(() => {
     setPhase("preview");
     const img = pickRandomImage();
     setCurrentImage(img);
-    setTimeout(() => initPuzzle(img), 2200);
+    setTimeout(() => initPuzzle(img), 2400);
   }, [initPuzzle]);
 
-  // ── Cause-effet : tap sur un slot caché → révèle la pièce ─────────────────
-  const handleCauseEffetTap = useCallback(
-    (slotIdx: number) => {
-      if (correctSlots[slotIdx]) return; // déjà révélée
+  // ── Cause-effet : tap sur un carré caché → révèle ─────────────────────────
+  const handleCauseEffetTap = useCallback((slotIdx: number) => {
+    if (correctSlots[slotIdx]) return;
+    playTone(329.6 + slotIdx * 55, 0.4, "sine", 0.8);
+    showEncouragement(ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)]);
+    setCorrectSlots((prev) => {
+      const next = [...prev];
+      next[slotIdx] = true;
+      if (next.every(Boolean)) {
+        setTimeout(() => { playMatch(); setPhase("solved"); }, 600);
+      }
+      return next;
+    });
+  }, [correctSlots, playTone, playMatch, showEncouragement]);
 
-      playTone(329.6 + slotIdx * 32, 0.4, "sine", 1);
-      showEncouragement(ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)]);
-
-      setCorrectSlots((prev) => {
-        const next = [...prev];
-        next[slotIdx] = true;
-        const allDone = next.every(Boolean);
-        if (allDone) {
-          setTimeout(() => setPhase("solved"), 600);
-          playMatch();
-        }
-        return next;
-      });
-    },
-    [correctSlots, playTone, playMatch, showEncouragement]
-  );
-
-  // ── Facile / Normal : sélection + placement ────────────────────────────────
+  // ── Facile/Normal : sélection + placement ─────────────────────────────────
   const handleTrayPieceClick = useCallback((pieceIdx: number) => {
     playClick();
     setSelectedPieceIdx((prev) => (prev === pieceIdx ? null : pieceIdx));
   }, [playClick]);
 
-  const handleSlotClick = useCallback(
-    (slotIdx: number) => {
-      if (correctSlots[slotIdx]) return; // slot déjà correct, on ne bouge plus
+  const handleSlotClick = useCallback((slotIdx: number) => {
+    if (correctSlots[slotIdx]) return;
 
-      if (selectedPieceIdx === null) {
-        // Rien sélectionné : si le slot a une pièce, on la re-prend
-        const existingPiece = slots[slotIdx];
-        if (existingPiece !== null) {
-          playClick();
-          setSlots((prev) => {
-            const next = [...prev];
-            next[slotIdx] = null;
-            return next;
-          });
-          setTrayOrder((prev) => [...prev, existingPiece]);
-          setSelectedPieceIdx(existingPiece);
-        }
-        return;
-      }
-
-      const isCorrect = selectedPieceIdx === slotIdx;
+    if (selectedPieceIdx === null) {
       const existingPiece = slots[slotIdx];
-
-      if (isCorrect) {
-        // Bonne position ! ✅
-        playMatch();
-        showEncouragement(ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)]);
-
-        setSlots((prev) => {
-          const next = [...prev];
-          // Si le slot avait déjà une pièce (incorrecte), elle retourne dans le bac
-          if (existingPiece !== null && existingPiece !== selectedPieceIdx) {
-            setTrayOrder((t) => [...t, existingPiece]);
-          }
-          next[slotIdx] = selectedPieceIdx;
-          return next;
-        });
-        setCorrectSlots((prev) => {
-          const next = [...prev];
-          next[slotIdx] = true;
-          const allDone = next.every(Boolean);
-          if (allDone) setTimeout(() => setPhase("solved"), 700);
-          return next;
-        });
-        setTrayOrder((prev) => prev.filter((p) => p !== selectedPieceIdx));
-        setSelectedPieceIdx(null);
-      } else {
-        // Mauvaise position — son doux, pièce reste sélectionnée
-        playSoft();
-        // On pose quand même la pièce (incorrecte, visuellement grayed out)
-        // pour que l'utilisateur puisse visualiser sa progression
-        setSlots((prev) => {
-          const next = [...prev];
-          if (existingPiece !== null) {
-            // Remettre l'ancienne pièce dans le bac
-            setTrayOrder((t) => [...t, existingPiece]);
-          }
-          next[slotIdx] = selectedPieceIdx;
-          return next;
-        });
-        setTrayOrder((prev) => prev.filter((p) => p !== selectedPieceIdx));
-        setSelectedPieceIdx(null);
+      if (existingPiece !== null) {
+        playClick();
+        setSlots((prev) => { const next = [...prev]; next[slotIdx] = null; return next; });
+        setTrayOrder((prev) => [...prev, existingPiece]);
+        setSelectedPieceIdx(existingPiece);
       }
-    },
-    [selectedPieceIdx, slots, correctSlots, playMatch, playSoft, playClick, showEncouragement]
-  );
+      return;
+    }
 
-  // ── Révéler le nom ─────────────────────────────────────────────────────────
+    const isCorrect = selectedPieceIdx === slotIdx;
+    const existingPiece = slots[slotIdx];
+
+    if (isCorrect) {
+      playMatch();
+      showEncouragement(ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)]);
+      setSlots((prev) => {
+        const next = [...prev];
+        if (existingPiece !== null && existingPiece !== selectedPieceIdx) {
+          setTrayOrder((t) => [...t, existingPiece]);
+        }
+        next[slotIdx] = selectedPieceIdx;
+        return next;
+      });
+      setCorrectSlots((prev) => {
+        const next = [...prev];
+        next[slotIdx] = true;
+        if (next.every(Boolean)) setTimeout(() => setPhase("solved"), 700);
+        return next;
+      });
+      setTrayOrder((prev) => prev.filter((p) => p !== selectedPieceIdx));
+      setSelectedPieceIdx(null);
+    } else {
+      playSoft();
+      setSlots((prev) => {
+        const next = [...prev];
+        if (existingPiece !== null) setTrayOrder((t) => [...t, existingPiece]);
+        next[slotIdx] = selectedPieceIdx;
+        return next;
+      });
+      setTrayOrder((prev) => prev.filter((p) => p !== selectedPieceIdx));
+      setSelectedPieceIdx(null);
+    }
+  }, [selectedPieceIdx, slots, correctSlots, playMatch, playSoft, playClick, showEncouragement]);
+
   const handleImageReveal = useCallback(() => {
     if (phase !== "solved") return;
     playMatch();
     setPhase("revealed");
-    setTimeout(() => onCelebrate(), 2500);
+    setTimeout(() => onCelebrate(), 2800);
   }, [phase, playMatch, onCelebrate]);
 
-  // ── Rejouer avec une autre image ──────────────────────────────────────────
   const nextPuzzle = useCallback(() => {
     const nextImg = pickRandomImage(currentImage.id);
     setPhase("preview");
     setCurrentImage(nextImg);
-    setTimeout(() => initPuzzle(nextImg), 2200);
+    setTimeout(() => initPuzzle(nextImg), 2400);
   }, [currentImage.id, initPuzzle]);
 
-  // Accès clavier : Tab pour naviguer, Espace/Entrée déjà gérés par button
-
-  // ── Rendu ──────────────────────────────────────────────────────────────────
-
-  // Idle
+  // ── Écran d'accueil ────────────────────────────────────────────────────────
   if (phase === "idle") {
     return (
       <div className="flex flex-col items-center justify-center w-full h-full gap-10 select-none">
-        <h2 className="font-masque font-bold text-brun text-4xl">🧩 Puzzle Photo</h2>
+        <div className="text-center">
+          <div className="text-8xl mb-4">🧩</div>
+          <h2 className="font-masque font-bold text-brun text-5xl">Puzzle Photo</h2>
+          <p className="font-masque text-brun/60 text-2xl mt-2">
+            {difficulty === "cause-effet"
+              ? "Découvre l'image cachée"
+              : difficulty === "facile"
+              ? `Assemble les ${totalPieces} pièces`
+              : `Relève le défi — ${totalPieces} pièces !`}
+          </p>
+        </div>
         <button
           onClick={startGame}
           autoFocus
           className={[
             "font-masque font-bold text-white text-3xl px-16 py-8 rounded-[2rem]",
             "transition-all hover:scale-105 active:scale-95",
-            "shadow-[0_6px_20px_rgba(0,0,0,0.3)]",
+            "shadow-[0_8px_28px_rgba(0,0,0,0.35)]",
             "focus-visible:ring-[6px] focus-visible:ring-brun focus-visible:outline-none",
           ].join(" ")}
           style={{ backgroundColor: "#1976D2" }}
@@ -373,211 +322,188 @@ export function PuzzleActivity({
     );
   }
 
-  // Preview
+  // ── Preview : montre l'image complète ─────────────────────────────────────
   if (phase === "preview") {
     return (
       <div className="flex flex-col items-center justify-center w-full h-full gap-8 select-none">
-        <p className="font-masque font-bold text-brun text-3xl">Regarde bien... 👀</p>
+        <p className="font-masque font-bold text-brun text-4xl">Regarde bien… 👀</p>
         <div
-          className="rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
-          style={{ width: puzzleSize, height: puzzleSize }}
+          className="rounded-3xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.4)]"
+          style={{ width: PUZZLE_SIZE, height: PUZZLE_SIZE }}
         >
-          <img
-            src={imgUrl}
-            alt="Image à reconstituer"
-            width={puzzleSize}
-            height={puzzleSize}
-            style={{ display: "block" }}
-          />
+          <img src={imgUrl} alt="Image à reconstituer" width={PUZZLE_SIZE} height={PUZZLE_SIZE} style={{ display: "block" }} />
         </div>
-        <p className="font-masque text-brun/50 text-xl">
-          Souviens-toi de l'image…
-        </p>
+        <p className="font-masque text-brun/50 text-xl">Souviens-toi de cette image…</p>
       </div>
     );
   }
 
-  // Résolu → affiche l'image complète et invite à taper
+  // ── Résolu / Révélé ────────────────────────────────────────────────────────
   if (phase === "solved" || phase === "revealed") {
     return (
       <div className="flex flex-col items-center justify-center w-full h-full gap-8 select-none">
-        <p className="font-masque font-bold text-brun text-3xl">
-          {phase === "revealed" ? "" : "Bravo ! Appuie sur l'image 👆"}
-        </p>
-
-        {/* Image complète — tap pour révéler le nom */}
+        {phase === "solved" && (
+          <p className="font-masque font-bold text-brun text-3xl animate-bounce">
+            Bravo ! Appuie sur l'image pour découvrir son nom 👆
+          </p>
+        )}
         <button
           onClick={handleImageReveal}
           disabled={phase === "revealed"}
           className={[
-            "rounded-2xl overflow-hidden",
-            "shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
+            "rounded-3xl overflow-hidden",
+            "shadow-[0_10px_40px_rgba(0,0,0,0.4)]",
             phase === "solved"
-              ? "cursor-pointer hover:scale-[1.02] active:scale-95 transition-all animate-[celebration_0.6s_ease-out]"
+              ? "cursor-pointer hover:scale-[1.03] active:scale-95 transition-all animate-[celebration_0.6s_ease-out]"
               : "cursor-default",
           ].join(" ")}
           aria-label="Appuie pour découvrir le nom"
-          style={{ width: puzzleSize, height: puzzleSize }}
+          style={{ width: PUZZLE_SIZE, height: PUZZLE_SIZE }}
         >
-          <img
-            src={imgUrl}
-            alt={currentImage.label}
-            width={puzzleSize}
-            height={puzzleSize}
-            style={{ display: "block" }}
-          />
+          <img src={imgUrl} alt={currentImage.label} width={PUZZLE_SIZE} height={PUZZLE_SIZE} style={{ display: "block" }} />
         </button>
-
-        {/* Nom révélé */}
         {phase === "revealed" && (
           <div
-            className="font-masque font-bold text-brun text-6xl animate-[slide-up_0.5s_cubic-bezier(0.34,1.56,0.64,1)]"
+            className="font-masque font-bold text-brun text-7xl animate-[slide-up_0.5s_cubic-bezier(0.34,1.56,0.64,1)]"
             aria-live="polite"
           >
             {currentImage.label}
           </div>
         )}
+        {phase === "solved" && (
+          <button
+            onClick={nextPuzzle}
+            className="font-masque font-bold text-white text-xl px-10 py-4 rounded-[1.5rem] bg-[#1976D2] hover:scale-105 active:scale-95 transition-all shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
+          >
+            Autre puzzle 🧩
+          </button>
+        )}
       </div>
     );
   }
 
-  // ── Phase de jeu ───────────────────────────────────────────────────────────
-  const placedInTray = new Set(trayOrder);
+  // ── Jeu en cours ───────────────────────────────────────────────────────────
   const solvedCount = correctSlots.filter(Boolean).length;
 
   return (
-    <div className="flex flex-col items-center justify-between w-full h-full px-8 py-6 gap-6 select-none">
-      {/* En-tête */}
-      <div className="text-center">
-        <h2 className="font-masque font-bold text-brun text-3xl">🧩 Puzzle Photo</h2>
-        <p className="font-masque text-brun/60 text-xl mt-1">
-          {difficulty === "cause-effet"
-            ? "Appuie sur chaque pièce pour la révéler ! 👆"
-            : selectedPieceIdx !== null
-            ? "Maintenant choisis un emplacement 🎯"
-            : "Choisis une pièce dans le bac 👇"}
-        </p>
-      </div>
+    <div className="flex-1 flex flex-col items-center justify-center w-full h-full gap-5 px-6 py-4 select-none">
 
-      {/* Grille puzzle */}
+      {/* Instruction */}
+      <p className="font-masque font-bold text-brun text-2xl text-center">
+        {difficulty === "cause-effet"
+          ? "👆 Appuie sur chaque carreau pour révéler l'image !"
+          : selectedPieceIdx !== null
+          ? "🎯 Maintenant, tap l'emplacement dans la grille"
+          : "✋ Choisis une pièce en bas, puis place-la dans la grille"}
+      </p>
+
+      {/* ── Grille puzzle ── */}
       <div
-        className="relative rounded-2xl overflow-hidden shadow-[0_6px_24px_rgba(0,0,0,0.3)]"
-        style={{ width: puzzleSize, height: puzzleSize }}
+        className="rounded-3xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.45)]"
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${cols}, ${pieceW}px)`,
+          gridTemplateRows: `repeat(${rows}, ${pieceH}px)`,
+          gap: 4,
+          padding: 4,
+          backgroundColor: "rgba(0,0,0,0.35)",
+          width: PUZZLE_SIZE + 8,
+          height: PUZZLE_SIZE + 8,
+        }}
       >
-        {/* Image de fond semi-transparente (guide visuel) */}
-        <img
-          src={imgUrl}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full opacity-10 pointer-events-none select-none"
-        />
-
-        {/* Grille de cases */}
-        <div
-          className="relative z-10"
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
-            width: "100%",
-            height: "100%",
-            gap: 3,
-            padding: 3,
-            backgroundColor: "rgba(255,255,255,0.15)",
-          }}
-        >
-          {Array.from({ length: totalPieces }).map((_, slotIdx) => {
-            if (difficulty === "cause-effet") {
-              // Cause-effet : case cachée (grise) ou révélée (image)
-              const revealed = correctSlots[slotIdx];
-              const pieceIdx = slotIdx; // chaque case = sa pièce correcte
-              const col = slotIdx % cols;
-              const row = Math.floor(slotIdx / cols);
-              const bgPosX = cols > 1 ? (col / (cols - 1)) * 100 : 0;
-              const bgPosY = rows > 1 ? (row / (rows - 1)) * 100 : 0;
-
-              return (
-                <button
-                  key={slotIdx}
-                  onClick={() => handleCauseEffetTap(slotIdx)}
-                  disabled={revealed}
-                  aria-label={`Case ${slotIdx + 1}${revealed ? " révélée" : ""}`}
-                  className={[
-                    "overflow-hidden rounded-md border-2 transition-all select-none",
-                    "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun",
-                    revealed
-                      ? "border-vert/50 cursor-default"
-                      : "border-white/40 bg-brun/30 cursor-pointer hover:bg-brun/40 active:scale-95",
-                  ].join(" ")}
-                  style={
-                    revealed
-                      ? {
-                          backgroundImage: `url(${imgUrl})`,
-                          backgroundSize: `${cols * 100}% ${rows * 100}%`,
-                          backgroundPosition: `${bgPosX}% ${bgPosY}%`,
-                          backgroundRepeat: "no-repeat",
-                          transition: reducedMotion ? "none" : undefined,
-                        }
-                      : { transition: reducedMotion ? "none" : undefined }
-                  }
-                >
-                  {!revealed && (
-                    <span className="text-3xl" role="img" aria-hidden>❓</span>
-                  )}
-                </button>
-              );
-            }
-
-            // Facile / Normal — slot
-            const filledPiece = slots[slotIdx] ?? null;
-            const isCorrect = correctSlots[slotIdx];
-
+        {Array.from({ length: totalPieces }).map((_, slotIdx) => {
+          if (difficulty === "cause-effet") {
+            const revealed = correctSlots[slotIdx];
+            const col = slotIdx % cols;
+            const row = Math.floor(slotIdx / cols);
+            const bgPosX = cols > 1 ? (col / (cols - 1)) * 100 : 0;
+            const bgPosY = rows > 1 ? (row / (rows - 1)) * 100 : 0;
             return (
-              <PuzzleSlot
+              <button
                 key={slotIdx}
-                slotIdx={slotIdx}
-                cols={cols}
-                rows={rows}
-                imgUrl={imgUrl}
-                size={puzzleSize}
-                filledPieceIdx={filledPiece}
-                correct={isCorrect}
-                selected={false}
-                difficulty={difficulty}
-                reducedMotion={reducedMotion}
-                onClick={() => handleSlotClick(slotIdx)}
-              />
+                onClick={() => handleCauseEffetTap(slotIdx)}
+                disabled={revealed}
+                aria-label={`Carreau ${slotIdx + 1}${revealed ? " — révélé" : ""}`}
+                className={[
+                  "overflow-hidden rounded-xl border-3 transition-all select-none",
+                  "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300",
+                  revealed
+                    ? "border-green-400/60 cursor-default"
+                    : "border-white/30 cursor-pointer active:scale-95",
+                ].join(" ")}
+                style={
+                  revealed
+                    ? {
+                        backgroundImage: `url(${imgUrl})`,
+                        backgroundSize: `${cols * 100}% ${rows * 100}%`,
+                        backgroundPosition: `${bgPosX}% ${bgPosY}%`,
+                        backgroundRepeat: "no-repeat",
+                        transition: reducedMotion ? "none" : undefined,
+                      }
+                    : {
+                        background: `hsl(${slotIdx * 60 + 200}, 65%, 45%)`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "clamp(2rem, 6vw, 3.5rem)",
+                        transition: reducedMotion ? "none" : undefined,
+                      }
+                }
+              >
+                {!revealed && <span role="img" aria-hidden>❓</span>}
+              </button>
             );
-          })}
-        </div>
+          }
+
+          const filledPiece = slots[slotIdx] ?? null;
+          const isCorrect = correctSlots[slotIdx];
+          return (
+            <PuzzleSlot
+              key={slotIdx}
+              slotIdx={slotIdx}
+              cols={cols}
+              rows={rows}
+              imgUrl={imgUrl}
+              pieceW={pieceW}
+              pieceH={pieceH}
+              filledPieceIdx={filledPiece}
+              correct={isCorrect}
+              reducedMotion={reducedMotion}
+              onClick={() => handleSlotClick(slotIdx)}
+            />
+          );
+        })}
       </div>
 
-      {/* Bac de pièces (facile/normal uniquement) */}
+      {/* ── Bac de pièces ── */}
       {difficulty !== "cause-effet" && (
-        <div className="flex flex-col items-center gap-3 w-full">
-          <p className="font-masque text-brun/50 text-sm">
-            {solvedCount}/{totalPieces} pièces placées
+        <div className="w-full flex flex-col items-center gap-2">
+          <p className="font-masque text-brun/60 text-lg">
+            {solvedCount === totalPieces
+              ? "🎉 Toutes les pièces sont en place !"
+              : `${solvedCount} / ${totalPieces} pièces placées`}
           </p>
           <div
-            className="flex flex-wrap justify-center gap-3 p-3 rounded-2xl"
-            style={{ backgroundColor: "rgba(74,59,47,0.08)" }}
+            className="flex gap-3 overflow-x-auto pb-2 px-4 max-w-full"
+            style={{ scrollbarWidth: "thin" }}
           >
             {trayOrder.map((pieceIdx) => (
-              <PuzzlePiece
+              <TrayPiece
                 key={pieceIdx}
                 pieceIdx={pieceIdx}
                 cols={cols}
                 rows={rows}
                 imgUrl={imgUrl}
-                size={puzzleSize}
+                pieceW={pieceW}
+                pieceH={pieceH}
+                traySize={trayPieceSize}
                 selected={selectedPieceIdx === pieceIdx}
-                placed={!placedInTray.has(pieceIdx)}
                 reducedMotion={reducedMotion}
                 onClick={() => handleTrayPieceClick(pieceIdx)}
               />
             ))}
             {trayOrder.length === 0 && (
-              <p className="font-masque text-brun/40 text-lg py-2 px-4">
+              <p className="font-masque text-brun/40 text-xl py-4 px-6">
                 Toutes les pièces sont posées !
               </p>
             )}
@@ -585,13 +511,20 @@ export function PuzzleActivity({
         </div>
       )}
 
-      {/* Toast d'encouragement */}
+      {/* Toast encouragement */}
       {encouragement && (
         <div
           key={encKey}
-          className="font-masque font-bold text-brun text-3xl animate-[slide-up_0.4s_cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none"
+          className="pointer-events-none fixed inset-x-0 top-1/3 flex justify-center z-30"
         >
-          {encouragement}
+          <span
+            className={[
+              "font-masque font-bold text-corail text-6xl mas-text-shadow",
+              reducedMotion ? "" : "animate-[celebration_0.5s_cubic-bezier(0.34,1.56,0.64,1)]",
+            ].join(" ")}
+          >
+            {encouragement}
+          </span>
         </div>
       )}
     </div>

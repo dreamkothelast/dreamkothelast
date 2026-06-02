@@ -1,7 +1,86 @@
-# MAS Tablette 🫧
+# MAS Tablette
 
-Suite de mini-jeux éducatifs et sensoriels pour adultes en situation de handicap (MAS).  
+Suite d'activités éducatives et sensorielles pour adultes en situation de handicap (MAS).  
 Application **100 % hors-ligne** — aucun appel réseau, jamais.
+
+---
+
+## Installer sur les tablettes Smartbox
+
+> Procédure complète pour déployer l'application sur les tablettes du service.
+
+### Étape 1 — Créer l'installeur .msi (à faire une seule fois sur votre PC de développement)
+
+Votre PC de dev doit avoir : **Node.js 18+**, **Rust 1.77+**, **npm 9+**
+
+```bash
+# 1. Cloner le dépôt (ou ouvrir le dossier existant)
+cd apps/mas-tablet
+
+# 2. Installer les dépendances
+npm install
+
+# 3. Compiler l'application Windows
+npm run tauri build
+```
+
+Le fichier produit se trouve ici :
+```
+apps/mas-tablet/src-tauri/target/release/bundle/msi/MAS Tablette_0.1.0_x64_en-US.msi
+```
+
+> **Si vous n'avez pas Rust :** installer via https://rustup.rs → `rustup-init.exe` → suivre les instructions → redémarrer le terminal.
+
+### Étape 2 — Transférer sur les tablettes Smartbox
+
+1. Copier le fichier `.msi` sur une **clé USB**
+2. Brancher la clé USB à la tablette Smartbox
+3. Depuis Windows (sur la tablette) : ouvrir la clé USB → double-clic sur le `.msi`
+4. Suivre l'assistant d'installation (droits administrateur requis)
+5. L'application apparaît dans le **menu Démarrer Windows** sous le nom « MAS Tablette »
+
+> Les tablettes Smartbox tournent sous **Windows 10/11** avec WebView2 pré-installé.  
+> Aucune installation supplémentaire n'est nécessaire.
+
+### Étape 3 — Lancer depuis Grid 3
+
+**Option A — Lancer directement :**  
+Depuis le bureau Windows de la tablette → clic sur l'icône **MAS Tablette**.
+
+**Option B — Intégrer dans Grid 3 (recommandé) :**
+
+1. Dans Grid 3 : **Éditer la grille** → **Nouvelle cellule** → type **« Commande Shell »** ou **« Ouvrir une application »**
+2. Chemin de l'application :
+   ```
+   C:\Program Files\MAS Tablette\MAS Tablette.exe
+   ```
+3. Donner un label à la cellule (ex. : « Mini-jeux ») et une icône
+4. Sauvegarder → la cellule apparaît dans votre grille Grid 3
+
+> La tablette peut ainsi basculer entre Grid 3 et MAS Tablette d'un seul tap, comme les autres applications de communication.
+
+### Mettre à jour l'application
+
+1. Rebuilder le `.msi` sur le PC de dev (même commande `npm run tauri build`)
+2. Transférer le nouveau `.msi` sur les tablettes et ré-exécuter l'installeur  
+   (il écrase la version précédente automatiquement)
+
+---
+
+## Ajouter de vraies photos dans le Puzzle Photo
+
+Remplacer les illustrations SVG par vos propres photos (résidents, staff, objets du service) :
+
+1. Placer vos photos dans `apps/mas-tablet/public/assets/images/puzzle/`  
+   (format `.jpg` ou `.png`, résolution recommandée : 400×400px minimum)
+
+2. Dans `src/data/puzzleImages.ts`, modifier les entrées :
+   ```typescript
+   { id: "jean", label: "Jean", category: "objets", src: "/assets/images/puzzle/jean.jpg" },
+   ```
+   *(remplacer le champ `svg` par `src` et adapter le rendu dans PuzzleActivity.tsx ligne ~30)*
+
+3. Rebuilder avec `npm run tauri build`
 
 ---
 
@@ -232,12 +311,15 @@ chaque écran expose une liste ordonnée d'éléments focusables via `tabIndex`.
 
 | Phase | Contenu | Statut |
 |-------|---------|--------|
-| 1 | Squelette + Accueil + Sensoriel (bulles) + Panneau accompagnant + Minuteur | ✅ |
+| 1 | Squelette + Accueil Grid3-style + Bulles Magiques + Panneau accompagnant + Minuteur | ✅ |
 | 2 | Les Paires (Memory) — cause-effet 2×2, facile 3×2, normal 4×4 | ✅ |
 | 3 | Jeu Musical (Simon) — 4 touches colorées, séquences, 3 modes | ✅ |
-| 4 | Jeu d'Écoute | 🔜 |
-| 5 | Polish accessibilité + Build .msi | 🔜 |
-| 6 | Mode balayage/scanning contacteur | 🗓 roadmap |
+| 4 | Puzzle Photo — SVG inline remplaçables par vraies photos, 3 modes | ✅ |
+| 5 | Scènes Visuelles — Forêt / Océan / Étoiles / Prairie, canvas interactif | ✅ |
+| 6 | Échelle de la Douleur — 6 niveaux, outil de communication, visages SVG | ✅ |
+| 7 | Jeu d'Écoute (sons + images à associer) | 🔜 |
+| 8 | Polish accessibilité + Build .msi testé sur Smartbox | 🔜 |
+| 9 | Mode balayage/scanning contacteur automatique | 🗓 roadmap |
 
 ### Jeu Les Paires — comportement par niveau
 

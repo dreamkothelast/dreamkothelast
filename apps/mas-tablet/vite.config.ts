@@ -5,6 +5,9 @@ import react from "@vitejs/plugin-react";
 export default defineConfig(async () => ({
   plugins: [react()],
 
+  // Chemins relatifs : fonctionne dans Tauri ET en ouverture directe file://
+  base: "./",
+
   // Tauri attend le dev-server sur ce port
   server: {
     port: 5173,

@@ -30,43 +30,40 @@ export function HomeScreen({ onSelectActivity, volume, reducedMotion }: HomeScre
 
   return (
     <div
-      className="flex flex-col items-center justify-center w-full h-full gap-10 px-8 py-8"
+      className="flex flex-col items-center justify-center w-full h-full gap-6 px-8 py-6"
       style={{
         background: "linear-gradient(155deg, #1a4a9a 0%, #2266c4 55%, #3a85d8 100%)",
       }}
     >
-      {/* En-tête avec mascotte */}
-      <div className="flex items-center gap-6">
+      {/* En-tête compact */}
+      <div className="flex items-center gap-4">
         <Mascot
-          state="idle"
-          size={reducedMotion ? 0 : 140}
+          state="wave"
+          size={reducedMotion ? 0 : 100}
           className={reducedMotion ? "hidden" : "drop-shadow-2xl"}
         />
         <div className="text-center">
-          <h1 className="font-masque font-bold text-white text-5xl leading-tight drop-shadow-lg">
+          <h1 className="font-masque font-bold text-white text-4xl leading-tight drop-shadow-lg">
             MAS Tablette
           </h1>
-          <p className="font-masque text-white/75 text-2xl mt-1 drop-shadow">
+          <p className="font-masque text-white/75 text-xl mt-0.5 drop-shadow">
             Choisis ton activité 👇
           </p>
         </div>
-        <Mascot
-          state="wave"
-          size={reducedMotion ? 0 : 140}
-          className={reducedMotion ? "hidden" : "drop-shadow-2xl"}
-        />
       </div>
 
-      {/* Grille de tuiles */}
+      {/* Grille de tuiles — s'adapte au nombre d'activités */}
       <nav
         aria-label="Activités disponibles"
         className={[
-          "grid gap-8 w-full max-w-[1400px]",
+          "grid gap-6 w-full",
           ACTIVITIES.length <= 2
-            ? "grid-cols-2"
+            ? "grid-cols-2 max-w-[900px]"
             : ACTIVITIES.length <= 4
-            ? "grid-cols-2 lg:grid-cols-4"
-            : "grid-cols-3 lg:grid-cols-5",
+            ? "grid-cols-4 max-w-[1400px]"
+            : ACTIVITIES.length <= 6
+            ? "grid-cols-3 max-w-[1200px]"
+            : "grid-cols-4 max-w-[1400px]",
         ].join(" ")}
       >
         {ACTIVITIES.map((activity, idx) => (

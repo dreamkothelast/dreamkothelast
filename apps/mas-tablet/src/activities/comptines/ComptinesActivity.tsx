@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { useSpeech } from "../../hooks/useSpeech";
 import { useOnlineTTS } from "../../hooks/useOnlineTTS";
+import voiceContent from "../../data/voiceContent.json";
 import type { ActivityProps } from "../../types";
 
 interface Comptine {
@@ -14,166 +15,8 @@ interface Comptine {
   melody: number[]; // Hz values cycled as background notes
 }
 
-const COMPTINES: Comptine[] = [
-  {
-    id: "frere-jacques",
-    title: "Frère Jacques",
-    emoji: "🔔",
-    primary: "#E53935",
-    secondary: "#B71C1C",
-    lines: [
-      "Frère Jacques, Frère Jacques,",
-      "Dormez-vous ? Dormez-vous ?",
-      "Sonnez les matines !",
-      "Sonnez les matines !",
-      "Din, din, don !  Din, din, don !",
-    ],
-    melody: [261.6, 293.7, 329.6, 261.6, 329.6, 392.0, 392.0, 261.6],
-  },
-  {
-    id: "promenons-nous",
-    title: "Promenons-nous dans les bois",
-    emoji: "🐺",
-    primary: "#388E3C",
-    secondary: "#1B5E20",
-    lines: [
-      "Promenons-nous dans les bois,",
-      "Pendant que le loup n'y est pas.",
-      "Si le loup y était,",
-      "Il nous mangerait !",
-      "Mais comme il n'y est pas,",
-      "Il nous mangera pas !",
-    ],
-    melody: [261.6, 329.6, 392.0, 440.0, 392.0, 329.6, 261.6, 261.6],
-  },
-  {
-    id: "petit-navire",
-    title: "Il était un petit navire",
-    emoji: "⛵",
-    primary: "#1565C0",
-    secondary: "#0D47A1",
-    lines: [
-      "Il était un petit navire,",
-      "Il était un petit navire,",
-      "Qui n'avait ja, jamais navigué,",
-      "Qui n'avait ja, jamais navigué,",
-      "Ohé ! Ohé ! 🌊",
-    ],
-    melody: [329.6, 392.0, 440.0, 523.2, 440.0, 392.0, 329.6, 293.7],
-  },
-  {
-    id: "ainsi-font",
-    title: "Ainsi font les marionnettes",
-    emoji: "🎭",
-    primary: "#7B1FA2",
-    secondary: "#4A148C",
-    lines: [
-      "Ainsi font, font, font,",
-      "Les petites marionnettes,",
-      "Ainsi font, font, font,",
-      "Trois p'tits tours et puis s'en vont !",
-      "Les mains font, font, font,",
-      "Les bras font, font, font… ✨",
-    ],
-    melody: [392.0, 440.0, 523.2, 440.0, 392.0, 329.6, 293.7, 261.6],
-  },
-  {
-    id: "furet",
-    title: "Il court, il court le furet",
-    emoji: "🐾",
-    primary: "#E65100",
-    secondary: "#BF360C",
-    lines: [
-      "Il court, il court le furet,",
-      "Le furet du bois, mesdames !",
-      "Il court, il court le furet,",
-      "Le furet du bois joli.",
-      "Il a passé par ici,",
-      "Il repassera par là !",
-    ],
-    melody: [261.6, 329.6, 261.6, 392.0, 329.6, 261.6, 440.0, 392.0],
-  },
-  {
-    id: "alouette",
-    title: "Alouette",
-    emoji: "🐦",
-    primary: "#00897B",
-    secondary: "#004D40",
-    lines: [
-      "Alouette, gentille alouette,",
-      "Alouette, je te plumerai.",
-      "Je te plumerai la tête,",
-      "Je te plumerai la tête,",
-      "Et la tête ! Et la tête !",
-      "Alouette ! Oh ! 🎵",
-    ],
-    melody: [261.6, 329.6, 392.0, 329.6, 261.6, 392.0, 329.6, 261.6],
-  },
-  {
-    id: "pont-avignon",
-    title: "Sur le pont d'Avignon",
-    emoji: "🌉",
-    primary: "#C0392B",
-    secondary: "#922B21",
-    lines: [
-      "Sur le pont d'Avignon,",
-      "On y danse, on y danse,",
-      "Sur le pont d'Avignon,",
-      "On y danse tous en rond.",
-      "Les belles dames font comme ça,",
-      "Et puis encore comme ça ! 💃",
-    ],
-    melody: [392.0, 440.0, 392.0, 349.2, 329.6, 293.7, 261.6, 293.7],
-  },
-  {
-    id: "bateau-eau",
-    title: "Bateau sur l'eau",
-    emoji: "🚣",
-    primary: "#1976D2",
-    secondary: "#0D47A1",
-    lines: [
-      "Bateau sur l'eau,",
-      "La rivière, la rivière,",
-      "Bateau sur l'eau,",
-      "La rivière au bord de l'eau.",
-      "Il a fait naufrage,",
-      "Patatras, dans l'eau ! 💦",
-    ],
-    melody: [440.0, 392.0, 349.2, 329.6, 293.7, 261.6, 293.7, 329.6],
-  },
-  {
-    id: "planter-choux",
-    title: "Savez-vous planter les choux",
-    emoji: "🥬",
-    primary: "#558B2F",
-    secondary: "#33691E",
-    lines: [
-      "Savez-vous planter les choux,",
-      "À la mode, à la mode ?",
-      "Savez-vous planter les choux,",
-      "À la mode de chez nous ?",
-      "On les plante avec les pieds,",
-      "À la mode de chez nous ! 🌱",
-    ],
-    melody: [261.6, 329.6, 392.0, 440.0, 392.0, 329.6, 261.6, 293.7],
-  },
-  {
-    id: "claire-fontaine",
-    title: "À la claire fontaine",
-    emoji: "💧",
-    primary: "#0288D1",
-    secondary: "#01579B",
-    lines: [
-      "À la claire fontaine,",
-      "M'en allant promener,",
-      "J'ai trouvé l'eau si belle,",
-      "Que je m'y suis baigné.",
-      "Il y a longtemps que je t'aime,",
-      "Jamais je ne t'oublierai. 💙",
-    ],
-    melody: [261.6, 293.7, 329.6, 392.0, 349.2, 329.6, 293.7, 261.6],
-  },
-];
+// Source unique partagée avec le générateur de voix (scripts/generate_voices.py)
+const COMPTINES: Comptine[] = voiceContent.comptines;
 
 // ms per beat (word advance interval)
 const BEAT_MS = 480;
@@ -181,7 +24,7 @@ const BEAT_MS = 480;
 export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: ActivityProps) {
   const { playTone, playKick, playHihat, playChord, resume } = useAudio(volume);
   const { available, parler, stop: stopSpeech } = useSpeech(Math.min(1, volume + 0.2));
-  const { speak: onlineSpeak, stop: onlineStop, isConfigured } = useOnlineTTS(Math.min(1, volume + 0.2));
+  const { speak: onlineSpeak, playBundled, stop: onlineStop, isConfigured } = useOnlineTTS(Math.min(1, volume + 0.2));
 
   const [view, setView] = useState<"list" | "playing">("list");
   const [current, setCurrent] = useState<Comptine | null>(null);
@@ -290,8 +133,9 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     }
   }, [stopMusic, stopVoice, stopWordHighlight, onCelebrate]);
 
-  // Narrate current line + start karaoke highlight
-  // Priority: 1) OpenAI TTS  2) Windows Speech  3) Timer only
+  // Narre la ligne + démarre le karaoké.
+  // Priorité : 1) clip Piper embarqué (naturel, hors-ligne) 2) voix IA en ligne
+  //            3) voix Windows  4) minuteur seul
   const performLine = useCallback((comptine: Comptine, idx: number) => {
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
     startWordHighlight(comptine.lines[idx]);
@@ -300,27 +144,25 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     const onEnd = () => {
       lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), 550);
     };
-
-    if (isConfigured()) {
-      // OpenAI TTS — belle voix naturelle, avec cache
-      onlineSpeak(text, { onEnd, speed: 0.88 }).then(success => {
-        if (!success) {
-          // Fallback : voix Windows ou minuteur
-          if (available) {
-            parler(text, { rate: 0.78, onEnd });
-          } else {
-            const wc = text.split(/\s+/).filter(Boolean).length;
-            lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), Math.max(3000, wc * BEAT_MS + 600));
-          }
-        }
-      });
-    } else if (available) {
-      parler(text, { rate: 0.78, onEnd });
-    } else {
+    const timerFallback = () => {
       const wc = text.split(/\s+/).filter(Boolean).length;
       lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), Math.max(3000, wc * BEAT_MS + 600));
-    }
-  }, [available, parler, onlineSpeak, isConfigured, goToNext, startWordHighlight]);
+    };
+    const voiceFallback = () => {
+      if (isConfigured()) {
+        onlineSpeak(text, { onEnd, speed: 0.88 }).then(ok => {
+          if (!ok) { available ? parler(text, { rate: 0.78, onEnd }) : timerFallback(); }
+        });
+      } else if (available) {
+        parler(text, { rate: 0.78, onEnd });
+      } else {
+        timerFallback();
+      }
+    };
+
+    // 1) Clip pré-généré Piper — voix française naturelle, embarquée
+    playBundled(text, { onEnd }).then(ok => { if (!ok) voiceFallback(); });
+  }, [available, parler, onlineSpeak, playBundled, isConfigured, goToNext, startWordHighlight]);
 
   // Trigger performLine when line changes while playing
   useEffect(() => {

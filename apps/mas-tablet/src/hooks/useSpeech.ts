@@ -19,29 +19,54 @@ function refreshVoices(): SpeechSynthesisVoice[] {
   return cachedVoices;
 }
 
-// Choisit la meilleure voix française disponible
-// Priorité : 1) voix neurales en ligne (Edge : Microsoft Denise/Henri Online Natural)
-//            2) voix fr-FR hors-ligne  3) toute voix française
+// Voix neurales Edge les plus douces/chaleureuses pour le français,
+// par ordre de préférence (gratuites, naturelles, idéales pour enfants).
+const PREFERRED_NEURAL = [
+  "Denise",    // femme, chaleureuse — la meilleure pour raconter
+  "Vivienne",  // femme, expressive
+  "Eloise",    // voix enfantine douce
+  "Josephine",
+  "Brigitte",
+  "Celeste",
+  "Remy",      // homme doux
+  "Henri",     // homme
+];
+
+// Choisit la meilleure voix française disponible.
+// Priorité : 1) voix neurale Edge préférée (Denise…) 2) toute voix neurale
+//            3) voix fr-FR hors-ligne  4) toute voix française
 function pickFrenchVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
   if (voices.length === 0) return null;
 
-  // Voix neurales en ligne Edge (gratuites, très naturelles)
-  const neural = voices.find(
-    (v) =>
-      v.lang.toLowerCase().startsWith("fr") &&
-      (v.name.includes("Online (Natural)") || v.name.toLowerCase().includes("neural"))
-  );
-  if (neural) return neural;
+  const isFr = (v: SpeechSynthesisVoice) => v.lang.toLowerCase().startsWith("fr");
+  const isNeural = (v: SpeechSynthesisVoice) =>
+    v.name.includes("Online (Natural)") || v.name.toLowerCase().includes("neural");
 
-  // Voix fr-FR hors-ligne (Hortense, Julie, Paul…)
+  // 1) Voix neurale préférée par nom
+  for (const name of PREFERRED_NEURAL) {
+    const match = voices.find((v) => isFr(v) && isNeural(v) && v.name.includes(name));
+    if (match) return match;
+  }
+
+  // 2) N'importe quelle voix neurale française
+  const anyNeural = voices.find((v) => isFr(v) && isNeural(v));
+  if (anyNeural) return anyNeural;
+
+  // 3) Voix fr-FR hors-ligne (Hortense, Julie, Paul…)
   const frFR = voices.find((v) => v.lang === "fr-FR");
   if (frFR) return frFR;
 
-  // N'importe quelle voix française
-  const fr = voices.find((v) => v.lang.toLowerCase().startsWith("fr"));
+  // 4) Toute voix française, sinon défaut
+  const fr = voices.find(isFr);
   if (fr) return fr;
 
   return voices.find((v) => v.default) ?? voices[0];
+}
+
+// Indique si la voix choisie est une voix neurale (haute qualité)
+export function isNeuralVoice(v: SpeechSynthesisVoice | null): boolean {
+  if (!v) return false;
+  return v.name.includes("Online (Natural)") || v.name.toLowerCase().includes("neural");
 }
 
 export interface SpeakOptions {

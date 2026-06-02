@@ -62,6 +62,12 @@ function cacheKey(text: string, provider: string): string {
   return CACHE_PREFIX + provider.slice(0, 2) + fnv32(text);
 }
 
+// Chemin du clip pré-généré (voix Piper) embarqué dans le paquet.
+// Nommé par le hash FNV-32 du texte exact (généré par scripts/generate_voices.py).
+export function bundledVoicePath(text: string): string {
+  return `./audio/${fnv32(text)}.mp3`;
+}
+
 function getCached(key: string): string | null {
   try { return localStorage.getItem(key); } catch { return null; }
 }
@@ -158,6 +164,39 @@ export function useOnlineTTS(volume = 1) {
     OnlineTTSConfig.keyType(OnlineTTSConfig.getKey()) !== "none"
   , []);
 
+  /**
+   * Joue le clip pré-généré (voix Piper naturelle) embarqué dans le paquet.
+   * 100 % hors-ligne, aucun robot. Retourne false si le fichier est absent.
+   */
+  const playBundled = useCallback((
+    text: string,
+    opts: OnlineTTSOptions = {}
+  ): Promise<boolean> => {
+    return new Promise<boolean>((resolve) => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      const audio = new Audio(bundledVoicePath(text));
+      audioRef.current = audio;
+      audio.volume = Math.min(1, Math.max(0, volume));
+
+      let settled = false;
+      const done = (ok: boolean) => {
+        if (settled) return;
+        settled = true;
+        resolve(ok);
+      };
+
+      audio.onended = () => { opts.onEnd?.(); done(true); };
+      // Fichier manquant ou illisible → on laisse le fallback prendre le relais
+      audio.onerror = () => done(false);
+      audio.play().then(() => done(true)).catch(() => done(false));
+      // Sécurité : si l'audio ne démarre pas en 1,5 s, on bascule
+      setTimeout(() => done(false), 1500);
+    });
+  }, [volume]);
+
   const speak = useCallback(async (
     text: string,
     opts: OnlineTTSOptions = {}
@@ -218,5 +257,5 @@ export function useOnlineTTS(volume = 1) {
     } catch {}
   }, []);
 
-  return { speak, stop, clearCache, isConfigured };
+  return { speak, playBundled, stop, clearCache, isConfigured };
 }

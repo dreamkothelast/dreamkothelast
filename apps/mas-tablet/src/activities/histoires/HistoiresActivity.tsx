@@ -2,9 +2,10 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { useSpeech } from "../../hooks/useSpeech";
 import { useOnlineTTS } from "../../hooks/useOnlineTTS";
+import voiceContent from "../../data/voiceContent.json";
 import type { ActivityProps } from "../../types";
 
-// ── Données des histoires ─────────────────────────────────────────────────────
+// ── Données des histoires (source unique partagée avec le générateur de voix) ──
 
 interface Page {
   emoji: string;
@@ -20,135 +21,14 @@ interface Histoire {
   pages: Page[];
 }
 
-const HISTOIRES: Histoire[] = [
-  {
-    id: "petit-chat",
-    title: "Le petit chat curieux",
-    emoji: "🐱",
-    primary: "#FF9800",
-    secondary: "#E65100",
-    pages: [
-      { emoji: "🐱", text: "Il était une fois un petit chat tout doux qui s'appelait Minou." },
-      { emoji: "🌳", text: "Un matin, Minou sortit dans le jardin. Le soleil brillait très fort." },
-      { emoji: "🦋", text: "Il vit un joli papillon bleu qui dansait dans les fleurs." },
-      { emoji: "🌸", text: "Minou voulut jouer avec lui. Il sauta, sauta, encore et encore !" },
-      { emoji: "😺", text: "Le papillon se posa sur son nez. Minou ferma les yeux et ronronna." },
-      { emoji: "❤️", text: "Et le soir, Minou s'endormit, heureux de sa belle journée. Bonne nuit, Minou !" },
-    ],
-  },
-  {
-    id: "etoile",
-    title: "La petite étoile",
-    emoji: "⭐",
-    primary: "#3F51B5",
-    secondary: "#1A237E",
-    pages: [
-      { emoji: "⭐", text: "Tout là-haut dans le ciel vivait une petite étoile qui brillait." },
-      { emoji: "🌙", text: "La nuit, elle veillait sur tous les enfants endormis." },
-      { emoji: "✨", text: "Elle envoyait sa douce lumière par la fenêtre, comme un câlin." },
-      { emoji: "😴", text: "Quand un enfant avait peur, l'étoile clignait pour le rassurer." },
-      { emoji: "🌟", text: "« Dors tranquille », disait-elle. « Je suis là, je te protège. »" },
-      { emoji: "💙", text: "Et chaque matin, l'étoile s'endormait, contente d'avoir veillé. Doux rêves !" },
-    ],
-  },
-  {
-    id: "ours",
-    title: "Le gros ours câlin",
-    emoji: "🐻",
-    primary: "#795548",
-    secondary: "#3E2723",
-    pages: [
-      { emoji: "🐻", text: "Dans la forêt vivait un gros ours tout doux qui adorait les câlins." },
-      { emoji: "🌲", text: "Chaque jour, il se promenait entre les grands arbres verts." },
-      { emoji: "🍯", text: "Il aimait beaucoup le miel doré, sucré et délicieux." },
-      { emoji: "🐝", text: "Les abeilles étaient ses amies. Elles bourdonnaient autour de lui." },
-      { emoji: "🤗", text: "Le soir, l'ours faisait un grand câlin à tous ses amis de la forêt." },
-      { emoji: "💤", text: "Puis il se blottissait dans sa grotte bien chaude pour dormir. À demain !" },
-    ],
-  },
-  {
-    id: "bateau",
-    title: "Le petit bateau",
-    emoji: "⛵",
-    primary: "#00ACC1",
-    secondary: "#006064",
-    pages: [
-      { emoji: "⛵", text: "Il y avait un petit bateau blanc qui voguait sur la mer bleue." },
-      { emoji: "🌊", text: "Les vagues le berçaient doucement, comme un berceau." },
-      { emoji: "🐬", text: "Des dauphins joueurs nageaient tout autour en sautant dans l'eau." },
-      { emoji: "🐟", text: "Sous la mer, des poissons colorés brillaient comme des bijoux." },
-      { emoji: "🌅", text: "Le soleil se couchait, peignant le ciel en rose et orange." },
-      { emoji: "⚓", text: "Le petit bateau rentra au port, fatigué mais heureux. Quelle belle journée !" },
-    ],
-  },
-  {
-    id: "grenouille",
-    title: "La petite grenouille verte",
-    emoji: "🐸",
-    primary: "#43A047",
-    secondary: "#1B5E20",
-    pages: [
-      { emoji: "🐸", text: "Dans la mare vivait une toute petite grenouille bien verte et bien douce." },
-      { emoji: "🌿", text: "Chaque matin, elle sautait de nénuphar en nénuphar en chantant." },
-      { emoji: "🦟", text: "Elle attrapait les moustiques avec sa longue et rapide langue rose." },
-      { emoji: "☔", text: "Quand il pleuvait, elle levait la tête et criait : « Coâ, coâ, coâ ! »" },
-      { emoji: "🌞", text: "Et quand le soleil revenait, elle s'étirait doucement sur sa grande feuille." },
-      { emoji: "💚", text: "La petite grenouille était heureuse, reine de sa jolie mare. Coâ !" },
-    ],
-  },
-  {
-    id: "lapin",
-    title: "Le lapin du jardin",
-    emoji: "🐰",
-    primary: "#F06292",
-    secondary: "#880E4F",
-    pages: [
-      { emoji: "🐰", text: "Dans le grand jardin vivait un lapin aux longues oreilles blanches et douces." },
-      { emoji: "🥕", text: "Il adorait grignoter les carottes oranges et les feuilles de salade." },
-      { emoji: "🌺", text: "Il courait parmi les fleurs colorées en faisant de grands bonds joyeux." },
-      { emoji: "🐦", text: "Les oiseaux chantaient et le lapin écoutait, les oreilles bien dressées." },
-      { emoji: "🌙", text: "Le soir, il rentrait dans son terrier bien douillet et bien chaud." },
-      { emoji: "🐾", text: "Bonne nuit, petit lapin ! Demain, de nouvelles aventures t'attendent !" },
-    ],
-  },
-  {
-    id: "coccinelle",
-    title: "La coccinelle voyageuse",
-    emoji: "🐞",
-    primary: "#E53935",
-    secondary: "#B71C1C",
-    pages: [
-      { emoji: "🐞", text: "Il y avait une belle coccinelle rouge avec sept points noirs sur le dos." },
-      { emoji: "🌻", text: "Elle aimait voler de fleur en fleur dans le jardin ensoleillé." },
-      { emoji: "☁️", text: "Un jour, le vent l'emporta très loin, très haut au-dessus des nuages." },
-      { emoji: "🌈", text: "Elle vit un magnifique arc-en-ciel et des prairies dorées à perte de vue." },
-      { emoji: "🏠", text: "Mais son cœur lui disait : « Rentre chez toi, c'est là que tu es heureuse. »" },
-      { emoji: "🌺", text: "La coccinelle revint au jardin, plus heureuse que jamais d'être à la maison !" },
-    ],
-  },
-  {
-    id: "nuage",
-    title: "Le petit nuage blanc",
-    emoji: "☁️",
-    primary: "#5C6BC0",
-    secondary: "#283593",
-    pages: [
-      { emoji: "☁️", text: "Haut dans le ciel bleu flottait un tout petit nuage blanc et doux." },
-      { emoji: "🌬️", text: "Le vent le promenait doucement au-dessus des maisons et des prés verts." },
-      { emoji: "🌧️", text: "Quand les fleurs avaient soif, le nuage leur envoyait de la pluie douce." },
-      { emoji: "🌸", text: "Les fleurs levaient la tête, souriaient et disaient merci au petit nuage." },
-      { emoji: "🌅", text: "Au coucher du soleil, le nuage devenait rose, puis orange, puis violet." },
-      { emoji: "⭐", text: "Et la nuit, le nuage se reposait, bercé tendrement par les étoiles. Dors bien !" },
-    ],
-  },
-];
+const HISTOIRES: Histoire[] = voiceContent.histoires;
 
 const PAGE_PAUSE = 900; // pause après la narration avant d'avancer (ms)
 
 export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: ActivityProps) {
   const { playClick, playTone } = useAudio(volume);
   const { available, parler, stop: stopSpeech } = useSpeech(Math.min(1, volume + 0.25));
-  const { speak: onlineSpeak, stop: onlineStop, isConfigured } = useOnlineTTS(Math.min(1, volume + 0.25));
+  const { speak: onlineSpeak, playBundled, stop: onlineStop, isConfigured } = useOnlineTTS(Math.min(1, volume + 0.25));
 
   const [view, setView] = useState<"list" | "reading">("list");
   const [story, setStory] = useState<Histoire | null>(null);
@@ -168,7 +48,9 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
 
   useEffect(() => () => { clearTimers(); stopVoice(); }, [clearTimers, stopVoice]);
 
-  // Narre une page (OpenAI TTS si disponible, sinon voix Windows, sinon minuteur)
+  // Narre une page.
+  // Priorité : 1) clip Piper embarqué (naturel, hors-ligne) 2) voix IA en ligne
+  //            3) voix Windows  4) avance directe
   const narratePage = useCallback((s: Histoire, idx: number) => {
     const page = s.pages[idx];
     const onEnd = () => {
@@ -182,18 +64,20 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         }
       }, PAGE_PAUSE);
     };
+    const voiceFallback = () => {
+      if (isConfigured()) {
+        onlineSpeak(page.text, { onEnd, speed: 0.9 }).then(ok => {
+          if (!ok) { available ? parler(page.text, { rate: 0.9, pitch: 1.05, onEnd }) : onEnd(); }
+        });
+      } else if (available) {
+        parler(page.text, { rate: 0.9, pitch: 1.05, onEnd });
+      } else {
+        onEnd();
+      }
+    };
 
-    if (isConfigured()) {
-      onlineSpeak(page.text, { onEnd, speed: 0.9 }).then(success => {
-        if (!success && available) parler(page.text, { rate: 0.9, pitch: 1.05, onEnd });
-        else if (!success) onEnd();
-      });
-    } else if (available) {
-      parler(page.text, { rate: 0.9, pitch: 1.05, onEnd });
-    } else {
-      onEnd();
-    }
-  }, [available, parler, onlineSpeak, isConfigured, playTone, onCelebrate]);
+    playBundled(page.text, { onEnd }).then(ok => { if (!ok) voiceFallback(); });
+  }, [available, parler, onlineSpeak, playBundled, isConfigured, playTone, onCelebrate]);
 
   // Quand la page change pendant la lecture, narre-la
   useEffect(() => {

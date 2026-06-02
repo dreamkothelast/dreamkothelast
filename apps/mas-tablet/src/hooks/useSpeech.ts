@@ -20,14 +20,27 @@ function refreshVoices(): SpeechSynthesisVoice[] {
 }
 
 // Choisit la meilleure voix française disponible
+// Priorité : 1) voix neurales en ligne (Edge : Microsoft Denise/Henri Online Natural)
+//            2) voix fr-FR hors-ligne  3) toute voix française
 function pickFrenchVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
   if (voices.length === 0) return null;
-  // Priorité : voix fr-FR, puis n'importe quelle voix commençant par "fr"
+
+  // Voix neurales en ligne Edge (gratuites, très naturelles)
+  const neural = voices.find(
+    (v) =>
+      v.lang.toLowerCase().startsWith("fr") &&
+      (v.name.includes("Online (Natural)") || v.name.toLowerCase().includes("neural"))
+  );
+  if (neural) return neural;
+
+  // Voix fr-FR hors-ligne (Hortense, Julie, Paul…)
   const frFR = voices.find((v) => v.lang === "fr-FR");
   if (frFR) return frFR;
+
+  // N'importe quelle voix française
   const fr = voices.find((v) => v.lang.toLowerCase().startsWith("fr"));
   if (fr) return fr;
-  // Sinon, une voix par défaut
+
   return voices.find((v) => v.default) ?? voices[0];
 }
 

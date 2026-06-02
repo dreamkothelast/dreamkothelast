@@ -83,7 +83,8 @@ export function CompanionPanel({
     } catch {}
   }, []);
 
-  const isKeyValid = apiKey.startsWith("sk-") || apiKey.startsWith("sk-proj-");
+  const keyType = OnlineTTSConfig.keyType(apiKey);
+  const isKeyValid = keyType !== "none";
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
@@ -289,8 +290,8 @@ export function CompanionPanel({
                   : "bg-brun/10 text-brun/50",
               ].join(" ")}>
                 {isKeyValid
-                  ? `✅ Voix IA active — ${cacheCount} ligne${cacheCount !== 1 ? "s" : ""} en cache`
-                  : "⬜ Sans clé : voix Windows locale"}
+                  ? `✅ Voix IA active (${keyType === "huggingface" ? "HuggingFace 🆓" : "OpenAI"}) — ${cacheCount} ligne${cacheCount !== 1 ? "s" : ""} en cache`
+                  : "⬜ Sans token : voix Windows locale"}
               </span>
 
               {cacheCount > 0 && (
@@ -303,11 +304,18 @@ export function CompanionPanel({
               )}
             </div>
 
-            <p className="font-masque text-brun/40 text-sm leading-snug max-w-[580px]">
-              Avec une clé OpenAI, les chansons et histoires utilisent une voix naturelle
-              et chaleureuse. L'audio est mis en cache : téléchargé une seule fois,
-              puis lu hors-ligne automatiquement.
-            </p>
+            <div className="font-masque text-brun/50 text-sm leading-snug max-w-[600px] flex flex-col gap-1">
+              <p>
+                🆓 <strong>Option gratuite</strong> — Créez un compte sur{" "}
+                <span className="text-brun/70">huggingface.co</span> puis
+                allez dans Settings → Access Tokens → New Token (lecture seule).
+                Collez le token <span className="font-bold">hf_…</span> ici.
+              </p>
+              <p>
+                L'audio est mis en cache : téléchargé une seule fois avec le WiFi,
+                puis relu hors-ligne indéfiniment.
+              </p>
+            </div>
           </div>
         </Row>
       </div>

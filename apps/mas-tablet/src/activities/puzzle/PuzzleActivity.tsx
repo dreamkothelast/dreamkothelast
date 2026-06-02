@@ -31,7 +31,10 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function svgToDataUrl(svg: string): string {
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  // Add explicit width/height so Edge/Chromium can determine intrinsic size
+  // (needed for CSS background-image; viewBox alone is not sufficient)
+  const sized = svg.replace('<svg ', '<svg width="300" height="300" ');
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sized)}`;
 }
 
 // ── Pièce dans le bac ────────────────────────────────────────────────────────
@@ -54,14 +57,13 @@ function TrayPiece({
 }: PieceProps) {
   const col = pieceIdx % cols;
   const row = Math.floor(pieceIdx / cols);
-  const bgPosX = cols > 1 ? (col / (cols - 1)) * 100 : 0;
-  const bgPosY = rows > 1 ? (row / (rows - 1)) * 100 : 0;
 
-  // background-size fills the piece at correct scale relative to tray size
-  const scaleX = traySize / pieceW;
-  const scaleY = traySize / pieceH;
-  const bgW = PUZZLE_SIZE * scaleX;
-  const bgH = PUZZLE_SIZE * scaleY;
+  // Scale the full puzzle image so one piece = traySize
+  const scaledW = Math.round(PUZZLE_SIZE * (traySize / pieceW));
+  const scaledH = Math.round(PUZZLE_SIZE * (traySize / pieceH));
+  // Offset to crop the correct piece (col * traySize = col * pieceW * scale)
+  const offsetX = -(col * traySize);
+  const offsetY = -(row * traySize);
 
   return (
     <button
@@ -69,8 +71,8 @@ function TrayPiece({
       aria-label={`Pièce ${pieceIdx + 1}`}
       aria-pressed={selected}
       className={[
-        "flex-shrink-0 overflow-hidden rounded-xl border-4 cursor-pointer",
-        "transition-all select-none",
+        "flex-shrink-0 rounded-xl border-4 cursor-pointer select-none",
+        "transition-all relative overflow-hidden",
         "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white",
         selected
           ? "border-yellow-300 scale-110 shadow-[0_0_20px_6px_rgba(255,220,50,0.8)] z-10"
@@ -79,13 +81,25 @@ function TrayPiece({
       style={{
         width: traySize,
         height: traySize,
-        backgroundImage: `url(${imgUrl})`,
-        backgroundSize: `${bgW}px ${bgH}px`,
-        backgroundPosition: `${bgPosX}% ${bgPosY}%`,
-        backgroundRepeat: "no-repeat",
         transition: reducedMotion ? "none" : undefined,
       }}
-    />
+    >
+      <img
+        src={imgUrl}
+        alt=""
+        aria-hidden
+        draggable={false}
+        style={{
+          position: "absolute",
+          width: scaledW,
+          height: scaledH,
+          left: offsetX,
+          top: offsetY,
+          userSelect: "none",
+          pointerEvents: "none",
+        }}
+      />
+    </button>
   );
 }
 
@@ -109,36 +123,55 @@ function PuzzleSlot({
 }: SlotProps) {
   const col = slotIdx % cols;
   const row = Math.floor(slotIdx / cols);
-  const bgPosX = cols > 1 ? (col / (cols - 1)) * 100 : 0;
-  const bgPosY = rows > 1 ? (row / (rows - 1)) * 100 : 0;
 
   const isEmpty = filledPieceIdx === null;
+
+  // For the filled piece image: full puzzle at cols×pieceW × rows×pieceH,
+  // shifted so the correct portion is visible in this pieceW×pieceH slot
+  const imgW = PUZZLE_SIZE;  // full puzzle width
+  const imgH = PUZZLE_SIZE;
+  const imgLeft = -(col * pieceW);
+  const imgTop  = -(row * pieceH);
 
   return (
     <button
       onClick={onClick}
       aria-label={`Emplacement ${slotIdx + 1}${correct ? " — correct" : ""}`}
       className={[
-        "overflow-hidden rounded-xl border-4 cursor-pointer",
-        "transition-all select-none",
+        "rounded-xl border-4 cursor-pointer select-none relative overflow-hidden",
+        "transition-all",
         "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white",
         correct
           ? "border-green-400 shadow-[0_0_16px_4px_rgba(74,222,128,0.7)] cursor-default"
           : isEmpty
-          ? "border-white/20 bg-white/8 hover:border-white/50 hover:bg-white/15"
+          ? "border-white/20 bg-white/10 hover:border-white/50 hover:bg-white/20"
           : "border-yellow-300/60 hover:border-white/70",
       ].join(" ")}
       style={{
         width: pieceW,
         height: pieceH,
-        backgroundImage: !isEmpty ? `url(${imgUrl})` : undefined,
-        backgroundSize: !isEmpty ? `${cols * 100}% ${rows * 100}%` : undefined,
-        backgroundPosition: !isEmpty ? `${bgPosX}% ${bgPosY}%` : undefined,
-        backgroundRepeat: "no-repeat",
-        opacity: !isEmpty && !correct ? 0.55 : 1,
+        opacity: !isEmpty && !correct ? 0.6 : 1,
         transition: reducedMotion ? "none" : undefined,
       }}
-    />
+    >
+      {!isEmpty && (
+        <img
+          src={imgUrl}
+          alt=""
+          aria-hidden
+          draggable={false}
+          style={{
+            position: "absolute",
+            width: imgW,
+            height: imgH,
+            left: imgLeft,
+            top: imgTop,
+            userSelect: "none",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+    </button>
   );
 }
 

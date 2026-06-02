@@ -78,7 +78,7 @@ export function HomeScreen({ onSelectActivity, volume, reducedMotion }: HomeScre
 
       {/* Indication discrète pour les accompagnants */}
       <p className="font-masque text-white/30 text-lg mt-2 text-center select-none">
-        Réglages : maintenir le coin bas-droit · Shift+F10
+        Réglages : bouton ⚙️ en bas à droite · Shift+F10
       </p>
     </div>
   );

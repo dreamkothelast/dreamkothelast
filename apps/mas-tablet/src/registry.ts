@@ -5,17 +5,16 @@ import { musicalActivity } from "./activities/musical";
 import { puzzleActivity } from "./activities/puzzle";
 import { scenesActivity } from "./activities/scenes";
 import { douleurActivity } from "./activities/douleur";
+import { photosActivity } from "./activities/photos";
+import { comptinesActivity } from "./activities/comptines";
 
-/**
- * Registre central des activités.
- * Ajouter une activité : créer son dossier + l'importer ici.
- * L'Accueil se régénère automatiquement.
- */
 export const ACTIVITIES: ActivityDefinition[] = [
-  sensoryActivity,   // 🫧 Bulles Magiques
-  memoryActivity,    // 🃏 Les Paires
-  musicalActivity,   // 🎵 Jeu Musical
-  puzzleActivity,    // 🧩 Puzzle Photo
-  scenesActivity,    // 🌿 Scènes Visuelles
-  douleurActivity,   // 🤗 Comment je me sens ?
+  sensoryActivity,    // 🫧 Bulles Magiques
+  memoryActivity,     // 🃏 Les Paires
+  musicalActivity,    // 🎵 Jeu Musical
+  puzzleActivity,     // 🧩 Puzzle Photo
+  scenesActivity,     // 🌿 Scènes Visuelles
+  douleurActivity,    // 🤗 Comment je me sens ?
+  photosActivity,     // 📷 Mes Photos
+  comptinesActivity,  // 🎵 Comptines
 ];

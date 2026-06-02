@@ -178,8 +178,7 @@ const COMPTINES: Comptine[] = [
 const BEAT_MS = 480;
 
 export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: ActivityProps) {
-  // Melody louder (triangle wave = richer timbre) + speech at slower rate
-  const { playTone, resume } = useAudio(volume * 0.9);
+  const { playTone, playKick, playHihat, playChord, resume } = useAudio(volume);
   const { available, parler, stop } = useSpeech(Math.min(1, volume + 0.2));
 
   const [view, setView] = useState<"list" | "playing">("list");
@@ -199,22 +198,37 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     [current, lineIdx]
   );
 
-  // ── Melody ────────────────────────────────────────────────────────────────
+  // ── Moteur musical enrichi ────────────────────────────────────────────────
   const startMusic = useCallback((comptine: Comptine) => {
     if (musicIntervalRef.current) clearInterval(musicIntervalRef.current);
     beatRef.current = 0;
     musicIntervalRef.current = setInterval(() => {
       resume();
-      const hz = comptine.melody[beatRef.current % comptine.melody.length];
-      // Triangle wave for richer, more musical timbre
-      playTone(hz, 0.42, "triangle", 0.9);
-      // Bass on every other beat for fullness
-      if (beatRef.current % 2 === 0) {
-        playTone(hz / 2, 0.48, "sine", 0.4);
+      const beat = beatRef.current;
+      const hz = comptine.melody[beat % comptine.melody.length];
+
+      // Mélodie : double oscillateur légèrement détunné → effet chorus/chaleur
+      playTone(hz, 0.42, "triangle", 1.9);
+      playTone(hz * 1.006, 0.42, "triangle", 0.95); // +10 cents de désynchro
+
+      // Basse sur chaque temps
+      playTone(hz / 2, 0.46, "sine", 1.5);
+
+      // Accord majeur tenu toutes les 4 notes (harmonie)
+      if (beat % 4 === 0) {
+        playChord(hz, (BEAT_MS * 3.8) / 1000, 1.6);
       }
+
+      // Rythmique : kick sur 1+3, hi-hat sur 2+4
+      if (beat % 4 === 0 || beat % 4 === 2) {
+        playKick(0.9);
+      } else {
+        playHihat(1.0);
+      }
+
       beatRef.current += 1;
     }, BEAT_MS);
-  }, [playTone, resume]);
+  }, [playTone, playKick, playHihat, playChord, resume]);
 
   const stopMusic = useCallback(() => {
     if (musicIntervalRef.current) {

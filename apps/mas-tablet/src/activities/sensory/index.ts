@@ -6,9 +6,9 @@ export const sensoryActivity: ActivityDefinition = {
   title: "Bulles Magiques",
   icon: "🫧",
   colors: {
-    primary: "#C5E9F8",   // ciel clair
-    secondary: "#3DA8D8", // ciel foncé
+    primary: "#29B6F6",   // bleu ciel vif
+    secondary: "#0277BD", // bleu profond
   },
   component: SensoryActivity,
-  sounds: [],             // Pas de fichiers audio : sons générés via Web Audio API
+  sounds: [],             // sons générés via Web Audio API
 };

@@ -1,6 +1,7 @@
 import type { ActivityDefinition } from "./types";
 import { sensoryActivity } from "./activities/sensory";
 import { memoryActivity } from "./activities/memory";
+import { musicalActivity } from "./activities/musical";
 
 /**
  * Registre central des activités.
@@ -10,12 +11,14 @@ import { memoryActivity } from "./activities/memory";
  *   2. Importer ici et ajouter à ACTIVITIES
  *   → L'Accueil se régénère automatiquement, aucun autre fichier à modifier.
  *
- * Phase 1  : Bulles Magiques (sensoriel)
- * Phase 2+ : Memory, Jeu Musical, Jeu d'Écoute
+ * Phase 1 : Bulles Magiques (sensoriel)
+ * Phase 2 : Les Paires (memory)
+ * Phase 3 : Jeu Musical (Simon)
+ * Phase 4 : Jeu d'Écoute (roadmap)
  */
 export const ACTIVITIES: ActivityDefinition[] = [
   sensoryActivity,
   memoryActivity,
-  // Phase 3 : musicalActivity,
+  musicalActivity,
   // Phase 4 : listeningActivity,
 ];

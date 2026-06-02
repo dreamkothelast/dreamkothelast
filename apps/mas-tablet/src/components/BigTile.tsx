@@ -7,8 +7,9 @@ interface BigTileProps {
 }
 
 /**
- * Tuile de l'écran d'accueil — grande cible tactile, gros picto + nom.
- * Navigation clavier (switch) : tabIndex ordonné, focus visible très marqué.
+ * Tuile de l'écran d'accueil — style Grid 3 :
+ * icône centrée sur fond coloré + bande titre en bas plus sombre.
+ * Grande cible tactile, texte blanc, ombres profondes.
  */
 export function BigTile({ activity, onClick, tabIndex = 0 }: BigTileProps) {
   return (
@@ -17,43 +18,38 @@ export function BigTile({ activity, onClick, tabIndex = 0 }: BigTileProps) {
       tabIndex={tabIndex}
       aria-label={`Jouer à ${activity.title}`}
       className={[
-        "relative flex flex-col items-center justify-center gap-4",
-        "min-w-[200px] min-h-[200px] p-6",
-        "rounded-mas-2xl border-[5px]",
-        "font-masque font-bold text-brun text-2xl text-center",
+        "relative flex flex-col items-stretch overflow-hidden",
+        "min-h-[220px] w-full",
+        "rounded-[2rem]",
         "cursor-pointer select-none",
-        "transition-all duration-300",
-        "shadow-tuile active:scale-95 active:shadow-tuile-press",
-        // Focus marqué pour accès contacteur (espace ou entrée)
-        "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-brun focus-visible:ring-offset-4 focus-visible:ring-offset-creme",
-        "hover:scale-[1.03] hover:brightness-105",
-        // Squash & stretch au clic (CSS : pas de motion si reduced-motion)
-        "motion-safe:active:scale-90",
+        "transition-all duration-200",
+        "shadow-[0_8px_28px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.25)]",
+        "active:scale-95 active:shadow-[0_3px_10px_rgba(0,0,0,0.35)]",
+        "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-transparent",
+        "hover:scale-[1.04] hover:shadow-[0_14px_36px_rgba(0,0,0,0.45)]",
       ].join(" ")}
-      style={{
-        backgroundColor: activity.colors.primary,
-        borderColor: activity.colors.secondary,
-      }}
+      style={{ backgroundColor: activity.colors.primary }}
     >
-      {/* Picto ou emoji */}
-      <span
-        className="text-7xl leading-none select-none motion-safe:animate-[float_3s_ease-in-out_infinite]"
-        role="img"
-        aria-hidden="true"
-      >
-        {activity.icon}
-      </span>
+      {/* Zone icône — occupe ~65 % de la hauteur */}
+      <div className="flex-1 flex items-center justify-center py-8">
+        <span
+          className="text-[88px] leading-none select-none motion-safe:animate-[float_3s_ease-in-out_infinite]"
+          role="img"
+          aria-hidden="true"
+        >
+          {activity.icon}
+        </span>
+      </div>
 
-      {/* Nom de l'activité */}
-      <span className="leading-tight max-w-[180px] text-brun drop-shadow-sm">
-        {activity.title}
-      </span>
-
-      {/* Ombre cel-shading bas */}
+      {/* Bande titre — style Grid 3 */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-2 rounded-b-[2.3rem] opacity-20"
+        className="px-4 py-4 text-center"
         style={{ backgroundColor: activity.colors.secondary }}
-      />
+      >
+        <span className="font-masque font-bold text-white text-2xl leading-tight drop-shadow-sm">
+          {activity.title}
+        </span>
+      </div>
     </button>
   );
 }

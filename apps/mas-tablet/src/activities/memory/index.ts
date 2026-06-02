@@ -6,8 +6,8 @@ export const memoryActivity: ActivityDefinition = {
   title: "Les Paires",
   icon: "🧩",
   colors: {
-    primary: "#FFE88C",   // soleil clair
-    secondary: "#FFD23F", // soleil
+    primary: "#FFA726",   // orange doux
+    secondary: "#E65100", // orange profond
   },
   component: MemoryActivity,
   sounds: [],             // sons générés via Web Audio API

@@ -131,9 +131,15 @@ apps/mas-tablet/
 │   ├── screens/
 │   │   └── HomeScreen.tsx     ← écran d'accueil avec tuiles
 │   └── activities/
-│       └── sensory/           ← Bulles Magiques (cause à effet)
+│       ├── sensory/           ← Bulles Magiques (cause à effet)
+│       │   ├── index.ts
+│       │   └── SensoryActivity.tsx
+│       ├── memory/            ← Les Paires (memory)
+│       │   ├── index.ts
+│       │   └── MemoryActivity.tsx
+│       └── musical/           ← Jeu Musical (Simon)
 │           ├── index.ts
-│           └── SensoryActivity.tsx
+│           └── MusicalActivity.tsx
 └── src-tauri/
     ├── tauri.conf.json        ← config fenêtre tablette 1920×1080
     ├── Cargo.toml
@@ -228,7 +234,7 @@ chaque écran expose une liste ordonnée d'éléments focusables via `tabIndex`.
 |-------|---------|--------|
 | 1 | Squelette + Accueil + Sensoriel (bulles) + Panneau accompagnant + Minuteur | ✅ |
 | 2 | Les Paires (Memory) — cause-effet 2×2, facile 3×2, normal 4×4 | ✅ |
-| 3 | Jeu Musical (Simon coloré) | 🔜 |
+| 3 | Jeu Musical (Simon) — 4 touches colorées, séquences, 3 modes | ✅ |
 | 4 | Jeu d'Écoute | 🔜 |
 | 5 | Polish accessibilité + Build .msi | 🔜 |
 | 6 | Mode balayage/scanning contacteur | 🗓 roadmap |

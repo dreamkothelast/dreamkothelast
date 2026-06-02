@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { useSpeech } from "../../hooks/useSpeech";
+import { useOnlineTTS } from "../../hooks/useOnlineTTS";
 import type { ActivityProps } from "../../types";
 
 interface Comptine {
@@ -179,7 +180,8 @@ const BEAT_MS = 480;
 
 export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: ActivityProps) {
   const { playTone, playKick, playHihat, playChord, resume } = useAudio(volume);
-  const { available, parler, stop } = useSpeech(Math.min(1, volume + 0.2));
+  const { available, parler, stop: stopSpeech } = useSpeech(Math.min(1, volume + 0.2));
+  const { speak: onlineSpeak, stop: onlineStop, isConfigured } = useOnlineTTS(Math.min(1, volume + 0.2));
 
   const [view, setView] = useState<"list" | "playing">("list");
   const [current, setCurrent] = useState<Comptine | null>(null);
@@ -263,45 +265,62 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     }, BEAT_MS);
   }, [stopWordHighlight]);
 
+  const stopVoice = useCallback(() => {
+    onlineStop();
+    stopSpeech();
+  }, [onlineStop, stopSpeech]);
+
   useEffect(() => () => {
     stopMusic();
-    stop();
+    stopVoice();
     stopWordHighlight();
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
-  }, [stopMusic, stop, stopWordHighlight]);
+  }, [stopMusic, stopVoice, stopWordHighlight]);
 
   // Advance to next line or finish
   const goToNext = useCallback((comptine: Comptine, idx: number) => {
     const next = idx + 1;
     if (next >= comptine.lines.length) {
       stopMusic();
-      stop();
+      stopVoice();
       stopWordHighlight();
       setTimeout(onCelebrate, 600);
     } else {
       setLineIdx(next);
     }
-  }, [stopMusic, stop, stopWordHighlight, onCelebrate]);
+  }, [stopMusic, stopVoice, stopWordHighlight, onCelebrate]);
 
   // Narrate current line + start karaoke highlight
+  // Priority: 1) OpenAI TTS  2) Windows Speech  3) Timer only
   const performLine = useCallback((comptine: Comptine, idx: number) => {
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
     startWordHighlight(comptine.lines[idx]);
 
-    if (available) {
-      parler(comptine.lines[idx], {
-        rate: 0.78,
-        onEnd: () => {
-          lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), 550);
-        },
+    const text = comptine.lines[idx];
+    const onEnd = () => {
+      lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), 550);
+    };
+
+    if (isConfigured()) {
+      // OpenAI TTS — belle voix naturelle, avec cache
+      onlineSpeak(text, { onEnd, speed: 0.88 }).then(success => {
+        if (!success) {
+          // Fallback : voix Windows ou minuteur
+          if (available) {
+            parler(text, { rate: 0.78, onEnd });
+          } else {
+            const wc = text.split(/\s+/).filter(Boolean).length;
+            lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), Math.max(3000, wc * BEAT_MS + 600));
+          }
+        }
       });
+    } else if (available) {
+      parler(text, { rate: 0.78, onEnd });
     } else {
-      // No TTS: advance on a timer based on word count
-      const wordCount = comptine.lines[idx].split(/\s+/).filter(Boolean).length;
-      const duration = Math.max(3000, wordCount * BEAT_MS + 600);
-      lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), duration);
+      const wc = text.split(/\s+/).filter(Boolean).length;
+      lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), Math.max(3000, wc * BEAT_MS + 600));
     }
-  }, [available, parler, goToNext, startWordHighlight]);
+  }, [available, parler, onlineSpeak, isConfigured, goToNext, startWordHighlight]);
 
   // Trigger performLine when line changes while playing
   useEffect(() => {
@@ -330,30 +349,30 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     } else {
       setPaused(true);
       stopMusic();
-      stop();
+      stopVoice();
       stopWordHighlight();
       if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
     }
-  }, [paused, current, lineIdx, startMusic, performLine, stopMusic, stop, stopWordHighlight]);
+  }, [paused, current, lineIdx, startMusic, performLine, stopMusic, stopVoice, stopWordHighlight]);
 
   // ── Next line (manual tap) ────────────────────────────────────────────────
   const nextLine = useCallback(() => {
     if (!current || paused) return;
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
-    stop();
+    stopVoice();
     stopWordHighlight();
     goToNext(current, lineIdx);
-  }, [current, paused, lineIdx, stop, stopWordHighlight, goToNext]);
+  }, [current, paused, lineIdx, stopVoice, stopWordHighlight, goToNext]);
 
   // ── Back to list ──────────────────────────────────────────────────────────
   const goBack = useCallback(() => {
     stopMusic();
-    stop();
+    stopVoice();
     stopWordHighlight();
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
     setView("list");
     setCurrent(null);
-  }, [stopMusic, stop, stopWordHighlight]);
+  }, [stopMusic, stopVoice, stopWordHighlight]);
 
   // ── List view ─────────────────────────────────────────────────────────────
   if (view === "list") {

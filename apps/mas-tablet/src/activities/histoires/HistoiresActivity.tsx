@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { useSpeech } from "../../hooks/useSpeech";
+import { useOnlineTTS } from "../../hooks/useOnlineTTS";
 import type { ActivityProps } from "../../types";
 
 // ── Données des histoires ─────────────────────────────────────────────────────
@@ -146,7 +147,8 @@ const PAGE_PAUSE = 900; // pause après la narration avant d'avancer (ms)
 
 export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: ActivityProps) {
   const { playClick, playTone } = useAudio(volume);
-  const { available, parler, stop } = useSpeech(Math.min(1, volume + 0.25));
+  const { available, parler, stop: stopSpeech } = useSpeech(Math.min(1, volume + 0.25));
+  const { speak: onlineSpeak, stop: onlineStop, isConfigured } = useOnlineTTS(Math.min(1, volume + 0.25));
 
   const [view, setView] = useState<"list" | "reading">("list");
   const [story, setStory] = useState<Histoire | null>(null);
@@ -159,27 +161,39 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
   }, []);
 
-  useEffect(() => () => { clearTimers(); stop(); }, [clearTimers, stop]);
+  const stopVoice = useCallback(() => {
+    onlineStop();
+    stopSpeech();
+  }, [onlineStop, stopSpeech]);
 
-  // Narre une page, puis avance automatiquement
+  useEffect(() => () => { clearTimers(); stopVoice(); }, [clearTimers, stopVoice]);
+
+  // Narre une page (OpenAI TTS si disponible, sinon voix Windows, sinon minuteur)
   const narratePage = useCallback((s: Histoire, idx: number) => {
     const page = s.pages[idx];
-    parler(page.text, {
-      rate: 0.9,
-      pitch: 1.05,
-      onEnd: () => {
-        advanceTimerRef.current = setTimeout(() => {
-          const next = idx + 1;
-          if (next >= s.pages.length) {
-            playTone(523.2, 0.4, "sine", 1);
-            setTimeout(onCelebrate, 500);
-          } else {
-            setPageIdx(next);
-          }
-        }, PAGE_PAUSE);
-      },
-    });
-  }, [parler, playTone, onCelebrate]);
+    const onEnd = () => {
+      advanceTimerRef.current = setTimeout(() => {
+        const next = idx + 1;
+        if (next >= s.pages.length) {
+          playTone(523.2, 0.4, "sine", 1);
+          setTimeout(onCelebrate, 500);
+        } else {
+          setPageIdx(next);
+        }
+      }, PAGE_PAUSE);
+    };
+
+    if (isConfigured()) {
+      onlineSpeak(page.text, { onEnd, speed: 0.9 }).then(success => {
+        if (!success && available) parler(page.text, { rate: 0.9, pitch: 1.05, onEnd });
+        else if (!success) onEnd();
+      });
+    } else if (available) {
+      parler(page.text, { rate: 0.9, pitch: 1.05, onEnd });
+    } else {
+      onEnd();
+    }
+  }, [available, parler, onlineSpeak, isConfigured, playTone, onCelebrate]);
 
   // Quand la page change pendant la lecture, narre-la
   useEffect(() => {
@@ -211,7 +225,7 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
   const goPage = useCallback((dir: -1 | 1) => {
     if (!story) return;
     clearTimers();
-    stop();
+    stopVoice();
     const next = pageIdx + dir;
     if (next < 0 || next >= story.pages.length) return;
     setPaused(false);
@@ -220,7 +234,7 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
 
   const goBack = useCallback(() => {
     clearTimers();
-    stop();
+    stopVoice();
     setView("list");
     setStory(null);
   }, [clearTimers, stop]);

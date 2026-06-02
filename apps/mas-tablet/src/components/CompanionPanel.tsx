@@ -1,6 +1,7 @@
-import { useRef, useCallback, type KeyboardEvent } from "react";
+import { useRef, useCallback, useState, type KeyboardEvent } from "react";
 import type { Settings, Difficulty, Intensity, ImageTheme } from "../types";
 import { BigButton } from "./BigButton";
+import { OnlineTTSConfig } from "../hooks/useOnlineTTS";
 
 interface CompanionPanelProps {
   settings: Settings;
@@ -60,6 +61,29 @@ export function CompanionPanel({
   timerActive,
 }: CompanionPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+
+  const [apiKey, setApiKey]       = useState(() => OnlineTTSConfig.getKey());
+  const [keyVisible, setKeyVisible] = useState(false);
+  const [cacheCount, setCacheCount] = useState(() => OnlineTTSConfig.getCacheCount());
+
+  const handleApiKeyChange = useCallback((val: string) => {
+    setApiKey(val);
+    OnlineTTSConfig.setKey(val);
+  }, []);
+
+  const handleClearCache = useCallback(() => {
+    try {
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k?.startsWith("mas-tts-v1-")) keys.push(k);
+      }
+      keys.forEach(k => localStorage.removeItem(k));
+      setCacheCount(0);
+    } catch {}
+  }, []);
+
+  const isKeyValid = apiKey.startsWith("sk-") || apiKey.startsWith("sk-proj-");
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
@@ -228,6 +252,63 @@ export function CompanionPanel({
               emoji={t.emoji}
             />
           ))}
+        </Row>
+
+        {/* Voix IA (OpenAI TTS) */}
+        <Row label="🎙 Voix IA">
+          <div className="flex flex-col gap-3 w-full">
+            <div className="flex items-center gap-2 flex-wrap">
+              <input
+                type={keyVisible ? "text" : "password"}
+                value={apiKey}
+                onChange={(e) => handleApiKeyChange(e.target.value)}
+                placeholder="sk-…  (clé API OpenAI)"
+                spellCheck={false}
+                autoComplete="off"
+                className={[
+                  "font-masque text-brun text-base px-4 py-3 rounded-mas border-3",
+                  "bg-creme focus:outline-none focus:ring-[5px] focus:ring-soleil",
+                  "min-w-[260px] flex-1",
+                  isKeyValid ? "border-green-500/60" : "border-brun/20",
+                ].join(" ")}
+              />
+              <button
+                onClick={() => setKeyVisible(v => !v)}
+                className="min-w-[56px] min-h-[56px] rounded-mas border-3 border-brun/20 bg-creme text-2xl active:scale-95 transition-all"
+                aria-label={keyVisible ? "Masquer la clé" : "Afficher la clé"}
+              >
+                {keyVisible ? "🙈" : "👁️"}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className={[
+                "font-masque text-base px-3 py-1 rounded-full",
+                isKeyValid
+                  ? "bg-green-100 text-green-800"
+                  : "bg-brun/10 text-brun/50",
+              ].join(" ")}>
+                {isKeyValid
+                  ? `✅ Voix IA active — ${cacheCount} ligne${cacheCount !== 1 ? "s" : ""} en cache`
+                  : "⬜ Sans clé : voix Windows locale"}
+              </span>
+
+              {cacheCount > 0 && (
+                <button
+                  onClick={handleClearCache}
+                  className="font-masque text-base text-brun/50 underline active:scale-95 transition-all"
+                >
+                  🗑 Vider le cache
+                </button>
+              )}
+            </div>
+
+            <p className="font-masque text-brun/40 text-sm leading-snug max-w-[580px]">
+              Avec une clé OpenAI, les chansons et histoires utilisent une voix naturelle
+              et chaleureuse. L'audio est mis en cache : téléchargé une seule fois,
+              puis lu hors-ligne automatiquement.
+            </p>
+          </div>
         </Row>
       </div>
     </div>

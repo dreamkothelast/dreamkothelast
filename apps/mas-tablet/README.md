@@ -227,8 +227,20 @@ chaque écran expose une liste ordonnée d'éléments focusables via `tabIndex`.
 | Phase | Contenu | Statut |
 |-------|---------|--------|
 | 1 | Squelette + Accueil + Sensoriel (bulles) + Panneau accompagnant + Minuteur | ✅ |
-| 2 | Memory (paires d'images) | 🔜 |
+| 2 | Les Paires (Memory) — cause-effet 2×2, facile 3×2, normal 4×4 | ✅ |
 | 3 | Jeu Musical (Simon coloré) | 🔜 |
 | 4 | Jeu d'Écoute | 🔜 |
 | 5 | Polish accessibilité + Build .msi | 🔜 |
 | 6 | Mode balayage/scanning contacteur | 🗓 roadmap |
+
+### Jeu Les Paires — comportement par niveau
+
+- **Cause-effet** (2×2) : aucune notion de paire. Chaque carte touchée se retourne,
+  sourit et récompense (son joyeux + encouragement). Toutes révélées → célébration.
+- **Facile** (3×2) / **Normal** (4×4) : vraies paires, avec temps d'observation au
+  départ (« Regarde bien… »). Erreur = son doux + on rejoue (jamais de pénalité).
+  Réussite = son joyeux + halo vert + encouragement flottant.
+
+Les images proviennent de `src/data/imageSets.ts` (placeholders emoji par thème).
+Pour utiliser de vrais assets, remplacer `emoji` par un chemin `src:` et adapter
+le rendu des cartes (voir `src/assets/images/README.md`).

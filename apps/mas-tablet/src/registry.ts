@@ -1,5 +1,6 @@
 import type { ActivityDefinition } from "./types";
 import { sensoryActivity } from "./activities/sensory";
+import { memoryActivity } from "./activities/memory";
 
 /**
  * Registre central des activités.
@@ -14,7 +15,7 @@ import { sensoryActivity } from "./activities/sensory";
  */
 export const ACTIVITIES: ActivityDefinition[] = [
   sensoryActivity,
-  // Phase 2 : memoryActivity,
+  memoryActivity,
   // Phase 3 : musicalActivity,
   // Phase 4 : listeningActivity,
 ];

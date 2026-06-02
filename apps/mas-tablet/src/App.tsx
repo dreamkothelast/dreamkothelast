@@ -90,6 +90,7 @@ export default function App() {
             difficulty={settings.difficulty}
             intensity={settings.intensity}
             reducedMotion={settings.reducedMotion}
+            theme={settings.theme}
             onCelebrate={openCelebration}
             onHome={goHome}
             volume={settings.volume}

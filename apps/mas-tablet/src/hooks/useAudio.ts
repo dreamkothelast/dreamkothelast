@@ -92,11 +92,26 @@ export function useAudio(volume = 0.7) {
     playTone(392.0, 0.18, "sine", 0.7);
   }, [playTone]);
 
-  // Son positif d'appariement (memory, etc.)
+  // Son positif d'appariement (memory, etc.) : tierce ascendante joyeuse
   const playMatch = useCallback(() => {
     playTone(523.2, 0.25, "sine");
     setTimeout(() => playTone(659.3, 0.3, "sine"), 140);
+    setTimeout(() => playTone(784.0, 0.35, "sine", 1.1), 280);
   }, [playTone]);
 
-  return { playTone, playBubble, playCelebration, playPreAlert, playClick, playMatch, resume };
+  // Son doux et neutre quand deux cartes ne correspondent pas.
+  // JAMAIS un buzzer : une note grave très douce, simple invitation à réessayer.
+  const playSoft = useCallback(() => {
+    playTone(293.7, 0.35, "sine", 0.5);
+  }, [playTone]);
+
+  // Son de retournement d'une carte (léger, feutré)
+  const playFlip = useCallback(() => {
+    playTone(440.0, 0.14, "triangle", 0.5);
+  }, [playTone]);
+
+  return {
+    playTone, playBubble, playCelebration, playPreAlert,
+    playClick, playMatch, playSoft, playFlip, resume,
+  };
 }

@@ -23,6 +23,7 @@ export interface ActivityProps {
   difficulty: Difficulty;
   intensity: Intensity;
   reducedMotion: boolean;
+  theme: ImageTheme;             // thème d'images choisi par l'accompagnant
   volume?: number;               // volume 0-1 (réglage accompagnant)
   onCelebrate: () => void;       // déclenche l'écran de célébration
   onHome: () => void;            // retour accueil direct

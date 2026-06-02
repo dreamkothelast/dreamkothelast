@@ -1,0 +1,88 @@
+import { useEffect } from "react";
+import { BigTile } from "../components/BigTile";
+import { Mascot } from "../components/Mascot";
+import { ACTIVITIES } from "../registry";
+import type { ActivityDefinition } from "../types";
+import { useAudio } from "../hooks/useAudio";
+
+interface HomeScreenProps {
+  onSelectActivity: (id: string) => void;
+  volume: number;
+  reducedMotion: boolean;
+}
+
+/**
+ * Écran d'accueil — fond bleu dégradé style Grid 3, grandes tuiles, mascotte.
+ * tabIndex ordonné pour compatibilité balayage switch.
+ */
+export function HomeScreen({ onSelectActivity, volume, reducedMotion }: HomeScreenProps) {
+  const { playClick } = useAudio(volume);
+
+  useEffect(() => {
+    const first = document.querySelector<HTMLElement>("nav button");
+    first?.focus();
+  }, []);
+
+  const handleSelect = (activity: ActivityDefinition) => {
+    playClick();
+    onSelectActivity(activity.id);
+  };
+
+  return (
+    <div
+      className="flex flex-col items-center justify-center w-full h-full gap-10 px-8 py-8"
+      style={{
+        background: "linear-gradient(155deg, #1a4a9a 0%, #2266c4 55%, #3a85d8 100%)",
+      }}
+    >
+      {/* En-tête avec mascotte */}
+      <div className="flex items-center gap-6">
+        <Mascot
+          state="idle"
+          size={reducedMotion ? 0 : 140}
+          className={reducedMotion ? "hidden" : "drop-shadow-2xl"}
+        />
+        <div className="text-center">
+          <h1 className="font-masque font-bold text-white text-5xl leading-tight drop-shadow-lg">
+            MAS Tablette
+          </h1>
+          <p className="font-masque text-white/75 text-2xl mt-1 drop-shadow">
+            Choisis ton activité 👇
+          </p>
+        </div>
+        <Mascot
+          state="wave"
+          size={reducedMotion ? 0 : 140}
+          className={reducedMotion ? "hidden" : "drop-shadow-2xl"}
+        />
+      </div>
+
+      {/* Grille de tuiles */}
+      <nav
+        aria-label="Activités disponibles"
+        className={[
+          "grid gap-8 w-full max-w-[1400px]",
+          ACTIVITIES.length <= 2
+            ? "grid-cols-2"
+            : ACTIVITIES.length <= 4
+            ? "grid-cols-2 lg:grid-cols-4"
+            : "grid-cols-3 lg:grid-cols-5",
+        ].join(" ")}
+      >
+        {ACTIVITIES.map((activity, idx) => (
+          <BigTile
+            key={activity.id}
+            activity={activity}
+            onClick={() => handleSelect(activity)}
+            tabIndex={idx + 1}
+          />
+        ))}
+      </nav>
+
+      {/* Indication discrète pour les accompagnants */}
+      <p className="font-masque text-white/30 text-lg mt-2 text-center select-none">
+        Réglages : maintenir le coin bas-droit · Shift+F10
+      </p>
+    </div>
+  );
+}

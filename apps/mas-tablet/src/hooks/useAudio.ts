@@ -1,32 +1,35 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useCallback } from "react";
 
-// Crée un AudioContext si disponible (Web Audio API, 100% offline)
-function createCtx(): AudioContext | null {
+// AudioContext partagé au niveau module : un seul contexte pour toute l'app.
+// Évite la limite navigateur (~6 contextes) et toute course « resume après close »
+// lors des navigations entre écrans. Jamais fermé tant que l'app vit.
+let sharedCtx: AudioContext | null = null;
+
+function getCtx(): AudioContext | null {
+  if (sharedCtx) return sharedCtx;
   try {
-    const Ctx = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    return Ctx ? new Ctx() : null;
+    const Ctx =
+      window.AudioContext ??
+      (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    sharedCtx = Ctx ? new Ctx() : null;
   } catch {
-    return null;
+    sharedCtx = null;
   }
+  return sharedCtx;
 }
 
 // Gamme pentatonique majeure de Do : douce à l'oreille, aucune dissonance possible
 const PENTATONIC_HZ = [261.6, 293.7, 329.6, 392.0, 440.0, 523.2, 587.3, 659.3];
 
 export function useAudio(volume = 0.7) {
-  const ctxRef = useRef<AudioContext | null>(null);
-
-  useEffect(() => {
-    ctxRef.current = createCtx();
-    return () => {
-      ctxRef.current?.close();
-    };
-  }, []);
-
-  // Reprend le contexte suspendu (politique autoplay)
+  // Reprend le contexte suspendu (politique autoplay).
+  // Protégé : ne fait rien si le contexte est fermé.
   const resume = useCallback(() => {
-    if (ctxRef.current?.state === "suspended") {
-      ctxRef.current.resume();
+    const ctx = getCtx();
+    if (ctx?.state === "suspended") {
+      ctx.resume().catch(() => {
+        /* contexte fermé ou indisponible : on ignore */
+      });
     }
   }, []);
 
@@ -38,8 +41,9 @@ export function useAudio(volume = 0.7) {
       type: OscillatorType = "sine",
       gain = 1
     ) => {
-      const ctx = ctxRef.current;
-      if (!ctx) return;
+      const ctx = getCtx();
+      // Ne joue rien si le contexte est absent ou fermé
+      if (!ctx || ctx.state === "closed") return;
       resume();
 
       const osc = ctx.createOscillator();

@@ -1,4 +1,4 @@
-import { useRef, useCallback, type ReactNode } from "react";
+import { useRef, useCallback, useEffect, type ReactNode } from "react";
 import { HomeButton } from "./HomeButton";
 import { SessionTimer } from "./SessionTimer";
 import type { TimerPhase } from "../hooks/useSessionTimer";
@@ -46,21 +46,23 @@ export function GameShell({
     }
   }, []);
 
-  // Raccourci clavier Shift+F10 pour l'accompagnant
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+  // Raccourci clavier Shift+F10 pour l'accompagnant.
+  // Attaché au niveau document pour fonctionner quel que soit l'élément focusé
+  // (robuste pour l'accès clavier/contacteur, même juste après une navigation).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === "F10") {
         e.preventDefault();
         onOpenCompanion();
       }
-    },
-    [onOpenCompanion]
-  );
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onOpenCompanion]);
 
   return (
     <div
       className={`relative w-full h-full flex flex-col overflow-hidden ${bgColor}`}
-      onKeyDown={handleKeyDown}
     >
       {/* Bouton Accueil — haut-gauche, fixe, toujours visible */}
       <HomeButton onClick={onHome} />

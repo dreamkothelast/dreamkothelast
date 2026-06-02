@@ -4,15 +4,15 @@ import { pickRandomImage } from "../../data/puzzleImages";
 import type { ActivityProps, Difficulty } from "../../types";
 import type { PuzzleImage } from "../../data/puzzleImages";
 
-// Grille par difficulté
 const GRID: Record<Difficulty, { cols: number; rows: number }> = {
   "cause-effet": { cols: 2, rows: 2 },
   "facile":      { cols: 3, rows: 3 },
   "normal":      { cols: 4, rows: 4 },
 };
 
-// Taille totale du puzzle (px) — grande et centrée sur 1920×1080
 const PUZZLE_SIZE = 600;
+// All SVGs use viewBox="0 0 300 300"
+const SVG_VB = 300;
 
 const ENCOURAGEMENTS = [
   "Bravo ! 🎉", "Super ! ⭐", "Bien joué ! 👏",
@@ -30,11 +30,12 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function svgToDataUrl(svg: string): string {
-  // Add explicit width/height so Edge/Chromium can determine intrinsic size
-  // (needed for CSS background-image; viewBox alone is not sufficient)
-  const sized = svg.replace('<svg ', '<svg width="300" height="300" ');
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sized)}`;
+// Strip the outer <svg> wrapper — keep only inner elements for inline embed
+function extractSvgInner(svg: string): string {
+  return svg
+    .replace(/<svg[^>]*>/, "")
+    .replace(/<\/svg>\s*$/, "")
+    .trim();
 }
 
 // ── Pièce dans le bac ────────────────────────────────────────────────────────
@@ -42,9 +43,7 @@ interface PieceProps {
   pieceIdx: number;
   cols: number;
   rows: number;
-  imgUrl: string;
-  pieceW: number;
-  pieceH: number;
+  svgInner: string;
   traySize: number;
   selected: boolean;
   reducedMotion: boolean;
@@ -52,18 +51,13 @@ interface PieceProps {
 }
 
 function TrayPiece({
-  pieceIdx, cols, rows, imgUrl, pieceW, pieceH, traySize,
+  pieceIdx, cols, rows, svgInner, traySize,
   selected, reducedMotion, onClick,
 }: PieceProps) {
   const col = pieceIdx % cols;
   const row = Math.floor(pieceIdx / cols);
-
-  // Scale the full puzzle image so one piece = traySize
-  const scaledW = Math.round(PUZZLE_SIZE * (traySize / pieceW));
-  const scaledH = Math.round(PUZZLE_SIZE * (traySize / pieceH));
-  // Offset to crop the correct piece (col * traySize = col * pieceW * scale)
-  const offsetX = -(col * traySize);
-  const offsetY = -(row * traySize);
+  const vbW = SVG_VB / cols;
+  const vbH = SVG_VB / rows;
 
   return (
     <button
@@ -71,8 +65,8 @@ function TrayPiece({
       aria-label={`Pièce ${pieceIdx + 1}`}
       aria-pressed={selected}
       className={[
-        "flex-shrink-0 rounded-xl border-4 cursor-pointer select-none",
-        "transition-all relative overflow-hidden",
+        "flex-shrink-0 rounded-xl border-4 cursor-pointer select-none overflow-hidden",
+        "transition-all",
         "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white",
         selected
           ? "border-yellow-300 scale-110 shadow-[0_0_20px_6px_rgba(255,220,50,0.8)] z-10"
@@ -84,20 +78,13 @@ function TrayPiece({
         transition: reducedMotion ? "none" : undefined,
       }}
     >
-      <img
-        src={imgUrl}
-        alt=""
+      <svg
+        width={traySize}
+        height={traySize}
+        viewBox={`${col * vbW} ${row * vbH} ${vbW} ${vbH}`}
+        dangerouslySetInnerHTML={{ __html: svgInner }}
         aria-hidden
-        draggable={false}
-        style={{
-          position: "absolute",
-          width: scaledW,
-          height: scaledH,
-          left: offsetX,
-          top: offsetY,
-          userSelect: "none",
-          pointerEvents: "none",
-        }}
+        style={{ display: "block", pointerEvents: "none" }}
       />
     </button>
   );
@@ -108,7 +95,7 @@ interface SlotProps {
   slotIdx: number;
   cols: number;
   rows: number;
-  imgUrl: string;
+  svgInner: string;
   pieceW: number;
   pieceH: number;
   filledPieceIdx: number | null;
@@ -118,27 +105,21 @@ interface SlotProps {
 }
 
 function PuzzleSlot({
-  slotIdx, cols, rows, imgUrl, pieceW, pieceH,
+  slotIdx, cols, rows, svgInner, pieceW, pieceH,
   filledPieceIdx, correct, reducedMotion, onClick,
 }: SlotProps) {
-  const col = slotIdx % cols;
-  const row = Math.floor(slotIdx / cols);
-
   const isEmpty = filledPieceIdx === null;
-
-  // For the filled piece image: full puzzle at cols×pieceW × rows×pieceH,
-  // shifted so the correct portion is visible in this pieceW×pieceH slot
-  const imgW = PUZZLE_SIZE;  // full puzzle width
-  const imgH = PUZZLE_SIZE;
-  const imgLeft = -(col * pieceW);
-  const imgTop  = -(row * pieceH);
+  const vbW = SVG_VB / cols;
+  const vbH = SVG_VB / rows;
+  const pieceCol = isEmpty ? 0 : filledPieceIdx % cols;
+  const pieceRow = isEmpty ? 0 : Math.floor(filledPieceIdx / cols);
 
   return (
     <button
       onClick={onClick}
       aria-label={`Emplacement ${slotIdx + 1}${correct ? " — correct" : ""}`}
       className={[
-        "rounded-xl border-4 cursor-pointer select-none relative overflow-hidden",
+        "rounded-xl border-4 cursor-pointer select-none overflow-hidden",
         "transition-all",
         "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white",
         correct
@@ -150,25 +131,18 @@ function PuzzleSlot({
       style={{
         width: pieceW,
         height: pieceH,
-        opacity: !isEmpty && !correct ? 0.6 : 1,
+        opacity: !isEmpty && !correct ? 0.65 : 1,
         transition: reducedMotion ? "none" : undefined,
       }}
     >
       {!isEmpty && (
-        <img
-          src={imgUrl}
-          alt=""
+        <svg
+          width={pieceW}
+          height={pieceH}
+          viewBox={`${pieceCol * vbW} ${pieceRow * vbH} ${vbW} ${vbH}`}
+          dangerouslySetInnerHTML={{ __html: svgInner }}
           aria-hidden
-          draggable={false}
-          style={{
-            position: "absolute",
-            width: imgW,
-            height: imgH,
-            left: imgLeft,
-            top: imgTop,
-            userSelect: "none",
-            pointerEvents: "none",
-          }}
+          style={{ display: "block", pointerEvents: "none" }}
         />
       )}
     </button>
@@ -187,11 +161,8 @@ export function PuzzleActivity({
   const { cols, rows } = GRID[difficulty];
   const totalPieces = cols * rows;
 
-  // Dimensions de chaque pièce dans la grille
   const pieceW = Math.floor(PUZZLE_SIZE / cols);
   const pieceH = Math.floor(PUZZLE_SIZE / rows);
-
-  // Taille des pièces dans le bac (75% de la taille de pièce, min 100px)
   const trayPieceSize = Math.max(100, Math.floor(Math.min(pieceW, pieceH) * 0.75));
 
   const [phase, setPhase] = useState<Phase>("idle");
@@ -204,7 +175,11 @@ export function PuzzleActivity({
   const [encKey, setEncKey] = useState(0);
   const encTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const imgUrl = useMemo(() => svgToDataUrl(currentImage.svg), [currentImage]);
+  // Inline SVG inner content — bypasses Edge data-URL restrictions
+  const svgInner = useMemo(
+    () => extractSvgInner(currentImage.svg),
+    [currentImage]
+  );
 
   const showEncouragement = useCallback((msg: string) => {
     if (encTimerRef.current) clearTimeout(encTimerRef.current);
@@ -239,7 +214,6 @@ export function PuzzleActivity({
     setTimeout(() => initPuzzle(img), 2400);
   }, [initPuzzle]);
 
-  // ── Cause-effet : tap sur un carré caché → révèle ─────────────────────────
   const handleCauseEffetTap = useCallback((slotIdx: number) => {
     if (correctSlots[slotIdx]) return;
     playTone(329.6 + slotIdx * 55, 0.4, "sine", 0.8);
@@ -254,7 +228,6 @@ export function PuzzleActivity({
     });
   }, [correctSlots, playTone, playMatch, showEncouragement]);
 
-  // ── Facile/Normal : sélection + placement ─────────────────────────────────
   const handleTrayPieceClick = useCallback((pieceIdx: number) => {
     playClick();
     setSelectedPieceIdx((prev) => (prev === pieceIdx ? null : pieceIdx));
@@ -355,7 +328,7 @@ export function PuzzleActivity({
     );
   }
 
-  // ── Preview : montre l'image complète ─────────────────────────────────────
+  // ── Preview ────────────────────────────────────────────────────────────────
   if (phase === "preview") {
     return (
       <div className="flex flex-col items-center justify-center w-full h-full gap-8 select-none">
@@ -364,7 +337,14 @@ export function PuzzleActivity({
           className="rounded-3xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.4)]"
           style={{ width: PUZZLE_SIZE, height: PUZZLE_SIZE }}
         >
-          <img src={imgUrl} alt="Image à reconstituer" width={PUZZLE_SIZE} height={PUZZLE_SIZE} style={{ display: "block" }} />
+          <svg
+            width={PUZZLE_SIZE}
+            height={PUZZLE_SIZE}
+            viewBox={`0 0 ${SVG_VB} ${SVG_VB}`}
+            dangerouslySetInnerHTML={{ __html: svgInner }}
+            aria-label="Image à reconstituer"
+            style={{ display: "block" }}
+          />
         </div>
         <p className="font-masque text-brun/50 text-xl">Souviens-toi de cette image…</p>
       </div>
@@ -393,7 +373,14 @@ export function PuzzleActivity({
           aria-label="Appuie pour découvrir le nom"
           style={{ width: PUZZLE_SIZE, height: PUZZLE_SIZE }}
         >
-          <img src={imgUrl} alt={currentImage.label} width={PUZZLE_SIZE} height={PUZZLE_SIZE} style={{ display: "block" }} />
+          <svg
+            width={PUZZLE_SIZE}
+            height={PUZZLE_SIZE}
+            viewBox={`0 0 ${SVG_VB} ${SVG_VB}`}
+            dangerouslySetInnerHTML={{ __html: svgInner }}
+            aria-label={currentImage.label}
+            style={{ display: "block" }}
+          />
         </button>
         {phase === "revealed" && (
           <div
@@ -417,11 +404,12 @@ export function PuzzleActivity({
 
   // ── Jeu en cours ───────────────────────────────────────────────────────────
   const solvedCount = correctSlots.filter(Boolean).length;
+  const vbW = SVG_VB / cols;
+  const vbH = SVG_VB / rows;
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center w-full h-full gap-5 px-6 py-4 select-none">
 
-      {/* Instruction */}
       <p className="font-masque font-bold text-brun text-2xl text-center">
         {difficulty === "cause-effet"
           ? "👆 Appuie sur chaque carreau pour révéler l'image !"
@@ -449,8 +437,6 @@ export function PuzzleActivity({
             const revealed = correctSlots[slotIdx];
             const col = slotIdx % cols;
             const row = Math.floor(slotIdx / cols);
-            const bgPosX = cols > 1 ? (col / (cols - 1)) * 100 : 0;
-            const bgPosY = rows > 1 ? (row / (rows - 1)) * 100 : 0;
             return (
               <button
                 key={slotIdx}
@@ -466,13 +452,7 @@ export function PuzzleActivity({
                 ].join(" ")}
                 style={
                   revealed
-                    ? {
-                        backgroundImage: `url(${imgUrl})`,
-                        backgroundSize: `${cols * 100}% ${rows * 100}%`,
-                        backgroundPosition: `${bgPosX}% ${bgPosY}%`,
-                        backgroundRepeat: "no-repeat",
-                        transition: reducedMotion ? "none" : undefined,
-                      }
+                    ? { transition: reducedMotion ? "none" : undefined }
                     : {
                         background: `hsl(${slotIdx * 60 + 200}, 65%, 45%)`,
                         display: "flex",
@@ -483,7 +463,18 @@ export function PuzzleActivity({
                       }
                 }
               >
-                {!revealed && <span role="img" aria-hidden>❓</span>}
+                {revealed ? (
+                  <svg
+                    width={pieceW}
+                    height={pieceH}
+                    viewBox={`${col * vbW} ${row * vbH} ${vbW} ${vbH}`}
+                    dangerouslySetInnerHTML={{ __html: svgInner }}
+                    aria-hidden
+                    style={{ display: "block", pointerEvents: "none" }}
+                  />
+                ) : (
+                  <span role="img" aria-hidden>❓</span>
+                )}
               </button>
             );
           }
@@ -496,7 +487,7 @@ export function PuzzleActivity({
               slotIdx={slotIdx}
               cols={cols}
               rows={rows}
-              imgUrl={imgUrl}
+              svgInner={svgInner}
               pieceW={pieceW}
               pieceH={pieceH}
               filledPieceIdx={filledPiece}
@@ -526,9 +517,7 @@ export function PuzzleActivity({
                 pieceIdx={pieceIdx}
                 cols={cols}
                 rows={rows}
-                imgUrl={imgUrl}
-                pieceW={pieceW}
-                pieceH={pieceH}
+                svgInner={svgInner}
                 traySize={trayPieceSize}
                 selected={selectedPieceIdx === pieceIdx}
                 reducedMotion={reducedMotion}
@@ -544,7 +533,6 @@ export function PuzzleActivity({
         </div>
       )}
 
-      {/* Toast encouragement */}
       {encouragement && (
         <div
           key={encKey}

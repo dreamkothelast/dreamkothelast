@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, type ChangeEvent } from "react";
 import { useAudio } from "../../hooks/useAudio";
+import { useSpeech } from "../../hooks/useSpeech";
 import type { ActivityProps } from "../../types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -41,6 +42,7 @@ function guessName(filename: string): string {
 // ── Composant principal ───────────────────────────────────────────────────────
 export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
   const { playClick, playMatch } = useAudio(volume);
+  const { parler } = useSpeech(Math.min(1, volume + 0.2));
 
   const [photos, setPhotos] = useState<StoredPhoto[]>(loadPhotos);
   const [view, setView] = useState<"grid" | "fullscreen">("grid");
@@ -89,11 +91,12 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
   // ── Ouvrir en plein écran ─────────────────────────────────────────────────
   const openPhoto = useCallback((photo: StoredPhoto) => {
     playClick();
+    parler(photo.name);
     setSelected(photo);
     setView("fullscreen");
     setDeleteConfirm(false);
     setEditingName(false);
-  }, [playClick]);
+  }, [playClick, parler]);
 
   const closeFullscreen = useCallback(() => {
     setView("grid");

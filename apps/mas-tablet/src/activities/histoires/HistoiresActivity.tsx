@@ -80,6 +80,66 @@ const HISTOIRES: Histoire[] = [
       { emoji: "⚓", text: "Le petit bateau rentra au port, fatigué mais heureux. Quelle belle journée !" },
     ],
   },
+  {
+    id: "grenouille",
+    title: "La petite grenouille verte",
+    emoji: "🐸",
+    primary: "#43A047",
+    secondary: "#1B5E20",
+    pages: [
+      { emoji: "🐸", text: "Dans la mare vivait une toute petite grenouille bien verte et bien douce." },
+      { emoji: "🌿", text: "Chaque matin, elle sautait de nénuphar en nénuphar en chantant." },
+      { emoji: "🦟", text: "Elle attrapait les moustiques avec sa longue et rapide langue rose." },
+      { emoji: "☔", text: "Quand il pleuvait, elle levait la tête et criait : « Coâ, coâ, coâ ! »" },
+      { emoji: "🌞", text: "Et quand le soleil revenait, elle s'étirait doucement sur sa grande feuille." },
+      { emoji: "💚", text: "La petite grenouille était heureuse, reine de sa jolie mare. Coâ !" },
+    ],
+  },
+  {
+    id: "lapin",
+    title: "Le lapin du jardin",
+    emoji: "🐰",
+    primary: "#F06292",
+    secondary: "#880E4F",
+    pages: [
+      { emoji: "🐰", text: "Dans le grand jardin vivait un lapin aux longues oreilles blanches et douces." },
+      { emoji: "🥕", text: "Il adorait grignoter les carottes oranges et les feuilles de salade." },
+      { emoji: "🌺", text: "Il courait parmi les fleurs colorées en faisant de grands bonds joyeux." },
+      { emoji: "🐦", text: "Les oiseaux chantaient et le lapin écoutait, les oreilles bien dressées." },
+      { emoji: "🌙", text: "Le soir, il rentrait dans son terrier bien douillet et bien chaud." },
+      { emoji: "🐾", text: "Bonne nuit, petit lapin ! Demain, de nouvelles aventures t'attendent !" },
+    ],
+  },
+  {
+    id: "coccinelle",
+    title: "La coccinelle voyageuse",
+    emoji: "🐞",
+    primary: "#E53935",
+    secondary: "#B71C1C",
+    pages: [
+      { emoji: "🐞", text: "Il y avait une belle coccinelle rouge avec sept points noirs sur le dos." },
+      { emoji: "🌻", text: "Elle aimait voler de fleur en fleur dans le jardin ensoleillé." },
+      { emoji: "☁️", text: "Un jour, le vent l'emporta très loin, très haut au-dessus des nuages." },
+      { emoji: "🌈", text: "Elle vit un magnifique arc-en-ciel et des prairies dorées à perte de vue." },
+      { emoji: "🏠", text: "Mais son cœur lui disait : « Rentre chez toi, c'est là que tu es heureuse. »" },
+      { emoji: "🌺", text: "La coccinelle revint au jardin, plus heureuse que jamais d'être à la maison !" },
+    ],
+  },
+  {
+    id: "nuage",
+    title: "Le petit nuage blanc",
+    emoji: "☁️",
+    primary: "#5C6BC0",
+    secondary: "#283593",
+    pages: [
+      { emoji: "☁️", text: "Haut dans le ciel bleu flottait un tout petit nuage blanc et doux." },
+      { emoji: "🌬️", text: "Le vent le promenait doucement au-dessus des maisons et des prés verts." },
+      { emoji: "🌧️", text: "Quand les fleurs avaient soif, le nuage leur envoyait de la pluie douce." },
+      { emoji: "🌸", text: "Les fleurs levaient la tête, souriaient et disaient merci au petit nuage." },
+      { emoji: "🌅", text: "Au coucher du soleil, le nuage devenait rose, puis orange, puis violet." },
+      { emoji: "⭐", text: "Et la nuit, le nuage se reposait, bercé tendrement par les étoiles. Dors bien !" },
+    ],
+  },
 ];
 
 const PAGE_PAUSE = 900; // pause après la narration avant d'avancer (ms)
@@ -168,33 +228,45 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
   // ── Vue liste ─────────────────────────────────────────────────────────────
   if (view === "list") {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-full gap-8 px-8 py-6 bg-gradient-to-b from-[#FFF3E0] to-[#FFF8F0]">
-        <div className="text-center">
-          <div className="text-7xl mb-2">📖</div>
-          <h2 className="font-masque font-bold text-brun text-4xl">Histoires</h2>
-          <p className="font-masque text-brun/60 text-xl mt-1">
+      <div
+        className="flex flex-col items-center justify-start w-full h-full gap-6 px-8 py-6 overflow-y-auto"
+        style={{
+          background: "linear-gradient(160deg, #4a148c 0%, #6a1b9a 40%, #7b1fa2 100%)",
+        }}
+      >
+        <div className="text-center pt-2">
+          <div className="text-6xl mb-2">📖</div>
+          <h2 className="font-masque font-bold text-white text-4xl drop-shadow-lg">Histoires</h2>
+          <p className="font-masque text-white/70 text-xl mt-1">
             {available
-              ? "Choisis une histoire à écouter 👇"
-              : "Choisis une histoire à lire 👇"}
+              ? "Choisis une histoire à écouter 📖"
+              : "Choisis une histoire à lire 📖"}
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 w-full max-w-[900px]">
+        <div className="grid grid-cols-2 gap-5 w-full max-w-[1000px] pb-4">
           {HISTOIRES.map((s) => (
             <button
               key={s.id}
               onClick={() => openStory(s)}
               className={[
-                "flex items-center gap-5 px-6 py-6 rounded-[2rem]",
-                "shadow-[0_6px_20px_rgba(0,0,0,0.25)]",
+                "flex items-center gap-4 px-6 py-5 rounded-[2rem] relative overflow-hidden",
+                "shadow-[0_6px_20px_rgba(0,0,0,0.4)]",
                 "cursor-pointer select-none text-left",
                 "transition-all duration-200 hover:scale-[1.03] active:scale-95",
-                "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-brun",
+                "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-white",
               ].join(" ")}
               style={{ backgroundColor: s.primary }}
             >
-              <span className="text-6xl drop-shadow-lg flex-shrink-0" role="img">{s.emoji}</span>
-              <span className="font-masque font-bold text-white text-2xl leading-tight">
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: "linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%)",
+                  borderRadius: "inherit",
+                }}
+              />
+              <span className="relative text-5xl drop-shadow-lg flex-shrink-0" role="img">{s.emoji}</span>
+              <span className="relative font-masque font-bold text-white text-xl leading-tight">
                 {s.title}
               </span>
             </button>
@@ -202,7 +274,7 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         </div>
 
         {!available && (
-          <p className="font-masque text-brun/40 text-base text-center max-w-[600px]">
+          <p className="font-masque text-white/50 text-base text-center max-w-[600px] pb-4">
             💡 Pour activer la voix qui raconte, ajoutez une voix française dans
             Windows (Paramètres → Heure et langue → Voix).
           </p>

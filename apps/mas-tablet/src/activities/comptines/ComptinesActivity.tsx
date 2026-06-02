@@ -1,18 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAudio } from "../../hooks/useAudio";
-import { useSpeech, hzToPitch } from "../../hooks/useSpeech";
+import { useSpeech } from "../../hooks/useSpeech";
 import type { ActivityProps } from "../../types";
-
-// ── Données des comptines ────────────────────────────────────────────────────
 
 interface Comptine {
   id: string;
   title: string;
   emoji: string;
-  primary: string;   // couleur fond tuile
-  secondary: string; // couleur label
+  primary: string;
+  secondary: string;
   lines: string[];
-  melody: number[];  // fréquences Hz à cycler en fond
+  melody: number[]; // Hz values cycled as background notes
 }
 
 const COMPTINES: Comptine[] = [
@@ -94,35 +92,126 @@ const COMPTINES: Comptine[] = [
     ],
     melody: [261.6, 329.6, 261.6, 392.0, 329.6, 261.6, 440.0, 392.0],
   },
+  {
+    id: "alouette",
+    title: "Alouette",
+    emoji: "🐦",
+    primary: "#00897B",
+    secondary: "#004D40",
+    lines: [
+      "Alouette, gentille alouette,",
+      "Alouette, je te plumerai.",
+      "Je te plumerai la tête,",
+      "Je te plumerai la tête,",
+      "Et la tête ! Et la tête !",
+      "Alouette ! Oh ! 🎵",
+    ],
+    melody: [261.6, 329.6, 392.0, 329.6, 261.6, 392.0, 329.6, 261.6],
+  },
+  {
+    id: "pont-avignon",
+    title: "Sur le pont d'Avignon",
+    emoji: "🌉",
+    primary: "#C0392B",
+    secondary: "#922B21",
+    lines: [
+      "Sur le pont d'Avignon,",
+      "On y danse, on y danse,",
+      "Sur le pont d'Avignon,",
+      "On y danse tous en rond.",
+      "Les belles dames font comme ça,",
+      "Et puis encore comme ça ! 💃",
+    ],
+    melody: [392.0, 440.0, 392.0, 349.2, 329.6, 293.7, 261.6, 293.7],
+  },
+  {
+    id: "bateau-eau",
+    title: "Bateau sur l'eau",
+    emoji: "🚣",
+    primary: "#1976D2",
+    secondary: "#0D47A1",
+    lines: [
+      "Bateau sur l'eau,",
+      "La rivière, la rivière,",
+      "Bateau sur l'eau,",
+      "La rivière au bord de l'eau.",
+      "Il a fait naufrage,",
+      "Patatras, dans l'eau ! 💦",
+    ],
+    melody: [440.0, 392.0, 349.2, 329.6, 293.7, 261.6, 293.7, 329.6],
+  },
+  {
+    id: "planter-choux",
+    title: "Savez-vous planter les choux",
+    emoji: "🥬",
+    primary: "#558B2F",
+    secondary: "#33691E",
+    lines: [
+      "Savez-vous planter les choux,",
+      "À la mode, à la mode ?",
+      "Savez-vous planter les choux,",
+      "À la mode de chez nous ?",
+      "On les plante avec les pieds,",
+      "À la mode de chez nous ! 🌱",
+    ],
+    melody: [261.6, 329.6, 392.0, 440.0, 392.0, 329.6, 261.6, 293.7],
+  },
+  {
+    id: "claire-fontaine",
+    title: "À la claire fontaine",
+    emoji: "💧",
+    primary: "#0288D1",
+    secondary: "#01579B",
+    lines: [
+      "À la claire fontaine,",
+      "M'en allant promener,",
+      "J'ai trouvé l'eau si belle,",
+      "Que je m'y suis baigné.",
+      "Il y a longtemps que je t'aime,",
+      "Jamais je ne t'oublierai. 💙",
+    ],
+    melody: [261.6, 293.7, 329.6, 392.0, 349.2, 329.6, 293.7, 261.6],
+  },
 ];
 
-// ── Durée d'affichage par ligne (ms) ─────────────────────────────────────────
-const LINE_DURATION = 3000;
-// ── Intervalle entre chaque note de fond (ms) ────────────────────────────────
-const BEAT_MS = 420;
+// ms per beat (word advance interval)
+const BEAT_MS = 480;
 
-// ── Composant principal ───────────────────────────────────────────────────────
 export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: ActivityProps) {
-  const { playTone, resume } = useAudio(volume * 0.5); // musique de fond plus discrète quand on chante
-  const { available, chanter, stop } = useSpeech(Math.min(1, volume + 0.25));
+  // Melody louder (triangle wave = richer timbre) + speech at slower rate
+  const { playTone, resume } = useAudio(volume * 0.9);
+  const { available, parler, stop } = useSpeech(Math.min(1, volume + 0.2));
 
   const [view, setView] = useState<"list" | "playing">("list");
   const [current, setCurrent] = useState<Comptine | null>(null);
   const [lineIdx, setLineIdx] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [wordIdx, setWordIdx] = useState(-1);
 
-  const beatRef = useRef(0);           // index dans le tableau melody
+  const beatRef = useRef(0);
   const musicIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lineTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ── Musique de fond ───────────────────────────────────────────────────────
+  // Words for current line (memoized to avoid repeated splits)
+  const currentWords = useMemo(
+    () => (current ? current.lines[lineIdx].split(/\s+/).filter(Boolean) : []),
+    [current, lineIdx]
+  );
+
+  // ── Melody ────────────────────────────────────────────────────────────────
   const startMusic = useCallback((comptine: Comptine) => {
     if (musicIntervalRef.current) clearInterval(musicIntervalRef.current);
     beatRef.current = 0;
     musicIntervalRef.current = setInterval(() => {
       resume();
       const hz = comptine.melody[beatRef.current % comptine.melody.length];
-      playTone(hz, 0.38, "sine", 0.55);
+      // Triangle wave for richer, more musical timbre
+      playTone(hz, 0.42, "triangle", 0.9);
+      // Bass on every other beat for fullness
+      if (beatRef.current % 2 === 0) {
+        playTone(hz / 2, 0.48, "sine", 0.4);
+      }
       beatRef.current += 1;
     }, BEAT_MS);
   }, [playTone, resume]);
@@ -134,52 +223,80 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     }
   }, []);
 
+  // ── Karaoke word highlight ────────────────────────────────────────────────
+  const stopWordHighlight = useCallback(() => {
+    if (wordTimerRef.current) {
+      clearInterval(wordTimerRef.current);
+      wordTimerRef.current = null;
+    }
+    setWordIdx(-1);
+  }, []);
+
+  const startWordHighlight = useCallback((lineText: string) => {
+    stopWordHighlight();
+    const words = lineText.split(/\s+/).filter(Boolean);
+    if (words.length === 0) return;
+    setWordIdx(0);
+    let i = 1;
+    wordTimerRef.current = setInterval(() => {
+      if (i >= words.length) {
+        clearInterval(wordTimerRef.current!);
+        wordTimerRef.current = null;
+        setWordIdx(-1);
+      } else {
+        setWordIdx(i++);
+      }
+    }, BEAT_MS);
+  }, [stopWordHighlight]);
+
   useEffect(() => () => {
     stopMusic();
     stop();
+    stopWordHighlight();
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
-  }, [stopMusic, stop]);
+  }, [stopMusic, stop, stopWordHighlight]);
 
-  // Passe à la ligne suivante (ou termine la comptine)
+  // Advance to next line or finish
   const goToNext = useCallback((comptine: Comptine, idx: number) => {
     const next = idx + 1;
     if (next >= comptine.lines.length) {
       stopMusic();
       stop();
+      stopWordHighlight();
       setTimeout(onCelebrate, 600);
     } else {
       setLineIdx(next);
     }
-  }, [stopMusic, stop, onCelebrate]);
+  }, [stopMusic, stop, stopWordHighlight, onCelebrate]);
 
-  // ── Chante (ou lit) une ligne, puis avance ─────────────────────────────────
+  // Narrate current line + start karaoke highlight
   const performLine = useCallback((comptine: Comptine, idx: number) => {
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
+    startWordHighlight(comptine.lines[idx]);
 
     if (available) {
-      // Voix chantée : hauteur des mots calquée sur la mélodie de la comptine
-      const pitches = comptine.melody.map(hzToPitch);
-      chanter(comptine.lines[idx], pitches, {
-        rate: 0.82,
+      parler(comptine.lines[idx], {
+        rate: 0.78,
         onEnd: () => {
-          // Petite respiration entre les lignes
-          lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), 650);
+          lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), 550);
         },
       });
     } else {
-      // Pas de voix dispo : avance au rythme du minuteur
-      lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), LINE_DURATION);
+      // No TTS: advance on a timer based on word count
+      const wordCount = comptine.lines[idx].split(/\s+/).filter(Boolean).length;
+      const duration = Math.max(3000, wordCount * BEAT_MS + 600);
+      lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), duration);
     }
-  }, [available, chanter, goToNext]);
+  }, [available, parler, goToNext, startWordHighlight]);
 
-  // Quand la ligne change pendant la lecture → on la chante
+  // Trigger performLine when line changes while playing
   useEffect(() => {
     if (view !== "playing" || !current || paused) return;
     performLine(current, lineIdx);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, current, lineIdx, paused]);
 
-  // ── Démarrer une comptine ─────────────────────────────────────────────────
+  // ── Open a comptine ───────────────────────────────────────────────────────
   const openComptine = useCallback((c: Comptine) => {
     resume();
     setCurrent(c);
@@ -187,10 +304,9 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
     setPaused(false);
     setView("playing");
     startMusic(c);
-    // performLine est déclenché par l'effet ci-dessus
   }, [resume, startMusic]);
 
-  // ── Pause / Reprise ───────────────────────────────────────────────────────
+  // ── Pause / Resume ────────────────────────────────────────────────────────
   const togglePause = useCallback(() => {
     if (!current) return;
     if (paused) {
@@ -201,58 +317,74 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
       setPaused(true);
       stopMusic();
       stop();
+      stopWordHighlight();
       if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
     }
-  }, [paused, current, lineIdx, startMusic, performLine, stopMusic, stop]);
+  }, [paused, current, lineIdx, startMusic, performLine, stopMusic, stop, stopWordHighlight]);
 
-  // ── Ligne suivante (manuelle) ─────────────────────────────────────────────
+  // ── Next line (manual tap) ────────────────────────────────────────────────
   const nextLine = useCallback(() => {
     if (!current || paused) return;
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
     stop();
+    stopWordHighlight();
     goToNext(current, lineIdx);
-  }, [current, paused, lineIdx, stop, goToNext]);
+  }, [current, paused, lineIdx, stop, stopWordHighlight, goToNext]);
 
-  // ── Retour à la liste ─────────────────────────────────────────────────────
+  // ── Back to list ──────────────────────────────────────────────────────────
   const goBack = useCallback(() => {
     stopMusic();
     stop();
+    stopWordHighlight();
     if (lineTimerRef.current) clearTimeout(lineTimerRef.current);
     setView("list");
     setCurrent(null);
-  }, [stopMusic, stop]);
+  }, [stopMusic, stop, stopWordHighlight]);
 
-  // ── Vue : liste des comptines ─────────────────────────────────────────────
+  // ── List view ─────────────────────────────────────────────────────────────
   if (view === "list") {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-full gap-8 px-8 py-6 bg-gradient-to-b from-[#FFF1D6] to-[#FFF6E9]">
-        <div className="text-center">
-          <div className="text-7xl mb-2">🎵</div>
-          <h2 className="font-masque font-bold text-brun text-4xl">Comptines</h2>
-          <p className="font-masque text-brun/60 text-xl mt-1">
+      <div
+        className="flex flex-col items-center justify-start w-full h-full gap-6 px-8 py-6 overflow-y-auto"
+        style={{
+          background: "linear-gradient(160deg, #1a237e 0%, #283593 40%, #3949ab 100%)",
+        }}
+      >
+        <div className="text-center pt-2">
+          <div className="text-6xl mb-2">🎵</div>
+          <h2 className="font-masque font-bold text-white text-4xl drop-shadow-lg">Comptines</h2>
+          <p className="font-masque text-white/70 text-xl mt-1">
             {available
-              ? "Une voix chante avec toi ! Choisis une chanson 👇"
-              : "Choisis une chanson 👇"}
+              ? "La voix chante avec toi ! Choisis une chanson 🎶"
+              : "Choisis une chanson — chante avec nous ! 🎶"}
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-5 w-full max-w-[1100px]">
+        <div className="grid grid-cols-4 gap-4 w-full max-w-[1300px] pb-4">
           {COMPTINES.map((c) => (
             <button
               key={c.id}
               onClick={() => openComptine(c)}
               className={[
-                "flex flex-col items-center justify-center gap-3",
-                "min-h-[160px] rounded-[2rem] overflow-hidden",
-                "shadow-[0_6px_20px_rgba(0,0,0,0.25)]",
+                "flex flex-col items-center justify-center gap-2",
+                "min-h-[150px] rounded-[1.8rem] overflow-hidden relative",
+                "shadow-[0_6px_20px_rgba(0,0,0,0.4)]",
                 "cursor-pointer select-none",
-                "transition-all duration-200 hover:scale-[1.04] active:scale-95",
-                "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-brun",
+                "transition-all duration-200 hover:scale-[1.05] active:scale-95",
+                "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-white",
               ].join(" ")}
               style={{ backgroundColor: c.primary }}
             >
-              <span className="text-6xl drop-shadow-lg" role="img">{c.emoji}</span>
-              <span className="font-masque font-bold text-white text-xl leading-tight text-center px-4">
+              {/* Shine overlay */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: "linear-gradient(to bottom, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 55%)",
+                  borderRadius: "inherit",
+                }}
+              />
+              <span className="relative text-5xl drop-shadow-lg" role="img">{c.emoji}</span>
+              <span className="relative font-masque font-bold text-white text-lg leading-tight text-center px-3">
                 {c.title}
               </span>
             </button>
@@ -260,16 +392,16 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         </div>
 
         {!available && (
-          <p className="font-masque text-brun/40 text-base text-center max-w-[640px]">
-            💡 Pour que la voix chante, ajoutez une voix française dans Windows
-            (Paramètres → Heure et langue → Voix → Ajouter une voix : Français).
+          <p className="font-masque text-white/50 text-base text-center max-w-[640px] pb-4">
+            💡 Pour activer la voix, ajoutez une voix française dans Windows
+            (Paramètres → Heure et langue → Voix → Ajouter : Français France).
           </p>
         )}
       </div>
     );
   }
 
-  // ── Vue : lecture en cours ────────────────────────────────────────────────
+  // ── Playing view ──────────────────────────────────────────────────────────
   if (!current) return null;
 
   const progress = current.lines.map((_, i) => i <= lineIdx);
@@ -277,9 +409,11 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
   return (
     <div
       className="flex flex-col w-full h-full select-none"
-      style={{ background: `linear-gradient(160deg, ${current.primary}22 0%, ${current.primary}08 100%)` }}
+      style={{
+        background: `linear-gradient(160deg, ${current.primary}30 0%, ${current.primary}10 100%)`,
+      }}
     >
-      {/* Barre de contrôles */}
+      {/* Controls bar */}
       <div className="flex items-center justify-between px-8 py-4 gap-4">
         <button
           onClick={goBack}
@@ -302,27 +436,62 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         </button>
       </div>
 
-      {/* Zone principale : ligne en cours — tap pour avancer */}
+      {/* Main area: tap to advance */}
       <button
         onClick={nextLine}
         disabled={paused}
         className={[
-          "flex-1 flex flex-col items-center justify-center px-12 gap-8",
+          "flex-1 flex flex-col items-center justify-center px-12 gap-6",
           "focus-visible:outline-none",
           paused ? "opacity-60" : "cursor-pointer",
         ].join(" ")}
         aria-label="Ligne suivante"
       >
+        {/* Karaoke word display */}
         <p
-          className={[
-            "font-masque font-bold text-brun text-center leading-tight",
-            "text-[clamp(2.5rem,6vw,5rem)]",
-            reducedMotion ? "" : "animate-[slide-up_0.4s_cubic-bezier(0.34,1.56,0.64,1)]",
-          ].join(" ")}
+          className="font-masque font-bold text-brun text-center leading-relaxed text-[clamp(2.8rem,6vw,5.5rem)]"
           key={lineIdx}
         >
-          {current.lines[lineIdx]}
+          {currentWords.map((word, i) => (
+            <span
+              key={i}
+              className="inline-block"
+              style={
+                i === wordIdx
+                  ? {
+                      color: "#FFD700",
+                      textShadow: "0 0 28px rgba(255,215,0,0.9), 0 2px 6px rgba(0,0,0,0.3)",
+                      transform: "scale(1.1)",
+                      transition: reducedMotion ? "none" : "transform 0.15s ease, color 0.15s ease",
+                    }
+                  : {
+                      transition: reducedMotion ? "none" : "color 0.15s ease",
+                    }
+              }
+            >
+              {word}
+              {i < currentWords.length - 1 ? " " : ""}
+            </span>
+          ))}
         </p>
+
+        {/* Musical note decorations */}
+        {!paused && (
+          <div className="flex items-center gap-3 opacity-60">
+            {["🎵", "🎶", "🎵"].map((n, i) => (
+              <span
+                key={i}
+                className="text-3xl"
+                style={{
+                  animation: reducedMotion ? "none" : `float ${1.2 + i * 0.3}s ease-in-out infinite`,
+                  animationDelay: `${i * 0.2}s`,
+                }}
+              >
+                {n}
+              </span>
+            ))}
+          </div>
+        )}
 
         {!paused && (
           <p className="font-masque text-brun/40 text-xl">
@@ -331,16 +500,17 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         )}
       </button>
 
-      {/* Barre de progression (points) */}
+      {/* Progress dots */}
       <div className="flex items-center justify-center gap-3 pb-8">
         {progress.map((done, i) => (
           <div
             key={i}
             className="rounded-full transition-all duration-300"
             style={{
-              width: i === lineIdx ? 24 : 14,
-              height: i === lineIdx ? 24 : 14,
+              width: i === lineIdx ? 26 : 14,
+              height: i === lineIdx ? 26 : 14,
               backgroundColor: done ? current.primary : `${current.primary}40`,
+              boxShadow: i === lineIdx ? `0 0 12px ${current.primary}` : "none",
             }}
           />
         ))}

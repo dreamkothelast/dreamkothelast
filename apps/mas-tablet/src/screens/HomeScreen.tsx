@@ -32,7 +32,7 @@ export function HomeScreen({ onSelectActivity, volume, reducedMotion }: HomeScre
     <div
       className="flex flex-col items-center justify-center w-full h-full gap-6 px-8 py-6"
       style={{
-        background: "linear-gradient(155deg, #1a4a9a 0%, #2266c4 55%, #3a85d8 100%)",
+        background: "linear-gradient(135deg, #1a237e 0%, #283593 25%, #1565c0 60%, #0288d1 100%)",
       }}
     >
       {/* En-tête compact */}

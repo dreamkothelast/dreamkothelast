@@ -53,9 +53,10 @@ export function GameShell({
       {/* Bouton Réglages — bas-droit, toujours visible, grande cible tactile */}
       <button
         onClick={onOpenCompanion}
+        style={{ bottom: "max(1.25rem, var(--safe-bottom))", right: "max(1.25rem, var(--safe-right))" }}
         className={[
-          "fixed bottom-5 right-5 z-50",
-          "min-w-[84px] min-h-[84px] px-4 py-2",
+          "fixed z-50",
+          "min-w-[64px] min-h-[64px] sm:min-w-[84px] sm:min-h-[84px] px-3 py-2 sm:px-4",
           "flex flex-col items-center justify-center gap-1",
           "bg-creme border-4 border-brun/30 rounded-mas-xl shadow-tuile",
           "font-masque font-bold text-brun text-base",
@@ -66,8 +67,8 @@ export function GameShell({
         ].join(" ")}
         aria-label="Ouvrir les réglages"
       >
-        <Icon name="gear" size={32} />
-        <span className="text-sm leading-tight">Réglages</span>
+        <Icon name="gear" size={32} className="w-7 h-7 sm:w-8 sm:h-8" />
+        <span className="hidden sm:inline text-sm leading-tight">Réglages</span>
       </button>
     </div>
   );

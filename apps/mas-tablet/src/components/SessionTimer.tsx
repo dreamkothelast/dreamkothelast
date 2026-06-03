@@ -18,8 +18,9 @@ export function SessionTimer({ label, phase, isActive }: SessionTimerProps) {
 
   return (
     <div
+      style={{ top: "max(1rem, var(--safe-top))", right: "max(1rem, var(--safe-right))" }}
       className={[
-        "fixed top-4 right-4 z-50",
+        "fixed z-50",
         "px-4 py-2 rounded-mas border-2",
         "font-masque font-semibold text-lg select-none",
         "shadow-tuile transition-all duration-500",

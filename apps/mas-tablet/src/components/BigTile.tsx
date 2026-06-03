@@ -15,8 +15,8 @@ export function BigTile({ activity, onClick, tabIndex = 0 }: BigTileProps) {
       aria-label={`Jouer à ${activity.title}`}
       className={[
         "relative flex flex-col items-stretch overflow-hidden",
-        "min-h-[200px] w-full",
-        "rounded-[2rem]",
+        "min-h-[120px] sm:min-h-[170px] lg:min-h-[200px] w-full",
+        "rounded-[1.25rem] sm:rounded-[2rem]",
         "cursor-pointer select-none",
         "transition-all duration-200",
         "shadow-[0_8px_28px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.3)]",
@@ -35,24 +35,24 @@ export function BigTile({ activity, onClick, tabIndex = 0 }: BigTileProps) {
         }}
       />
 
-      {/* Icon area */}
-      <div className="relative flex-1 flex items-center justify-center py-7">
+      {/* Icon area — taille pilotée en CSS (override de l'attribut SVG) */}
+      <div className="relative flex-1 flex items-center justify-center py-3 sm:py-6 lg:py-7">
         <Icon
           name={activity.icon}
           size={104}
-          className="select-none motion-safe:animate-[float_3s_ease-in-out_infinite] drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]"
+          className="w-14 h-14 sm:w-20 sm:h-20 lg:w-[104px] lg:h-[104px] select-none motion-safe:animate-[float_3s_ease-in-out_infinite] drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]"
         />
       </div>
 
       {/* Title band */}
       <div
-        className="relative px-4 py-4 text-center"
+        className="relative px-2 py-2 sm:px-4 sm:py-4 text-center"
         style={{
           background: `linear-gradient(to bottom, ${activity.colors.secondary}ee, ${activity.colors.secondary})`,
           borderTop: "1px solid rgba(255,255,255,0.15)",
         }}
       >
-        <span className="font-masque font-bold text-white text-[1.35rem] leading-tight drop-shadow-sm block">
+        <span className="font-masque font-bold text-white text-base sm:text-xl lg:text-[1.35rem] leading-tight drop-shadow-sm block">
           {activity.title}
         </span>
       </div>

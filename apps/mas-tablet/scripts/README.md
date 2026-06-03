@@ -55,10 +55,11 @@ FNV-32) → **toujours 100 % hors-ligne dans l'app, aucune clé requise à l'usa
 # 1. Clé API ElevenLabs (https://elevenlabs.io → Profile → API key)
 export ELEVENLABS_API_KEY=sk_xxxxxxxx
 
-# 2. (optionnel) voix distinctes histoires / comptines — ID depuis la
-#    bibliothèque de voix ElevenLabs (Voices → Use → copier l'ID).
-export ELEVENLABS_VOICE_ID_HISTOIRES=XB0fDUnXU5powFXDhCwa   # voix conteur
-export ELEVENLABS_VOICE_ID_COMPTINES=XB0fDUnXU5powFXDhCwa   # voix chantante
+# 2. (optionnel) Les voix par défaut sont déjà choisies (voir ci-dessous).
+#    Pour en changer, copiez un ID depuis la bibliothèque ElevenLabs
+#    (Voices → Use → copier l'ID) :
+# export ELEVENLABS_VOICE_ID_HISTOIRES=...   # voix narration
+# export ELEVENLABS_VOICE_ID_COMPTINES=...   # voix chantante
 
 # 3. Générer (Node 18+, aucune dépendance npm)
 npm run voices:elevenlabs              # comptines + histoires
@@ -66,9 +67,17 @@ npm run voices:elevenlabs:histoires    # seulement les histoires
 npm run voices:elevenlabs:comptines    # seulement les comptines
 ```
 
-Réglages par défaut : modèle `eleven_multilingual_v2`, voix « Charlotte »
-(FR, douce), `stability 0.5 / similarity 0.8` (lecture posée et régulière).
-Surchargez via `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL_ID`.
+Réglages par défaut : modèle `eleven_multilingual_v2`,
+`stability 0.5 / similarity 0.8` (lecture posée et régulière), avec deux voix
+adaptées au public :
+
+| Usage | Voix par défaut | ID | Caractère |
+|---|---|---|---|
+| Histoires | **Sarah** | `EXAVITQu4vr4xnSDxMaL` | mature, rassurante, posée |
+| Comptines | **Laura** | `FGY2WhTYpPnrIDTdsKH5` | enthousiaste, vivante |
+
+Surchargez via `ELEVENLABS_VOICE_ID` (les deux), `ELEVENLABS_VOICE_ID_HISTOIRES`,
+`ELEVENLABS_VOICE_ID_COMPTINES`, `ELEVENLABS_MODEL_ID`.
 
 > 💡 Au runtime, l'app accepte aussi une clé ElevenLabs (`sk_…`) dans
 > Réglages → Voix IA, comme filet de secours pour tout **nouveau** texte non

@@ -33,10 +33,15 @@ if (!API_KEY) {
   console.error("✗ ELEVENLABS_API_KEY manquante. export ELEVENLABS_API_KEY=sk_...");
   process.exit(1);
 }
-// Voix par défaut : « Charlotte » (FR/multilingue, douce). Surchargeable.
-const VOICE_DEFAULT   = process.env.ELEVENLABS_VOICE_ID || "XB0fDUnXU5powFXDhCwa";
-const VOICE_HISTOIRES = process.env.ELEVENLABS_VOICE_ID_HISTOIRES || VOICE_DEFAULT;
-const VOICE_COMPTINES = process.env.ELEVENLABS_VOICE_ID_COMPTINES || VOICE_DEFAULT;
+// Voix par défaut (présentes dans la bibliothèque standard ElevenLabs) :
+//   • Histoires → « Sarah » (mature, rassurante, posée) — narration douce
+//   • Comptines → « Laura » (enthousiaste, vivante) — rythme chanté
+// Toutes surchargeables par variables d'environnement.
+const VOICE_HISTOIRES_DEFAULT = "EXAVITQu4vr4xnSDxMaL"; // Sarah
+const VOICE_COMPTINES_DEFAULT = "FGY2WhTYpPnrIDTdsKH5"; // Laura
+const VOICE_DEFAULT   = process.env.ELEVENLABS_VOICE_ID || VOICE_HISTOIRES_DEFAULT;
+const VOICE_HISTOIRES = process.env.ELEVENLABS_VOICE_ID_HISTOIRES || process.env.ELEVENLABS_VOICE_ID || VOICE_HISTOIRES_DEFAULT;
+const VOICE_COMPTINES = process.env.ELEVENLABS_VOICE_ID_COMPTINES || process.env.ELEVENLABS_VOICE_ID || VOICE_COMPTINES_DEFAULT;
 const MODEL_ID = process.env.ELEVENLABS_MODEL_ID || "eleven_multilingual_v2";
 
 // ── Hash FNV-32 — identique au JS (itère sur les unités UTF-16) ──────────────

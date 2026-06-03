@@ -22,8 +22,8 @@ const CACHE_PREFIX    = "mas-tts-v1-";
 // ── Modèle HF pour le français ─────────────────────────────────────────────
 const HF_MODEL_FR = "facebook/mms-tts-fra";
 
-// ── ElevenLabs : voix FR par défaut (« Charlotte ») + modèle multilingue ─────
-const ELEVEN_VOICE_FR = "XB0fDUnXU5powFXDhCwa";
+// ── ElevenLabs : voix FR par défaut (« Sarah », rassurante) + modèle multilingue ─
+const ELEVEN_VOICE_FR = "EXAVITQu4vr4xnSDxMaL"; // Sarah
 const ELEVEN_MODEL    = "eleven_multilingual_v2";
 
 export interface OnlineTTSOptions {

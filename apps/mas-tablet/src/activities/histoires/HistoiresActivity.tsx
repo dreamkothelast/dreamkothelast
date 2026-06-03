@@ -128,28 +128,28 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
   if (view === "list") {
     return (
       <div
-        className="flex flex-col items-center justify-start w-full h-full gap-6 px-8 py-6 overflow-y-auto"
+        className="mas-scroll flex flex-col items-center justify-start w-full h-full gap-4 sm:gap-6 px-4 sm:px-8 py-4 sm:py-6"
         style={{
           background: "linear-gradient(160deg, #4a148c 0%, #6a1b9a 40%, #7b1fa2 100%)",
         }}
       >
         <div className="text-center pt-2 flex flex-col items-center">
-          <Icon name="book" size={64} className="mb-2 drop-shadow-lg" />
-          <h2 className="font-masque font-bold text-white text-4xl drop-shadow-lg">Histoires</h2>
-          <p className="font-masque text-white/70 text-xl mt-1">
+          <Icon name="book" size={64} className="w-12 h-12 sm:w-16 sm:h-16 mb-2 drop-shadow-lg" />
+          <h2 className="font-masque font-bold text-white text-2xl sm:text-4xl drop-shadow-lg">Histoires</h2>
+          <p className="font-masque text-white/70 text-base sm:text-xl mt-1 text-center">
             {available
               ? "Choisis une histoire à écouter"
               : "Choisis une histoire à lire"}
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-5 w-full max-w-[1000px] pb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 w-full max-w-[1000px] pb-4">
           {HISTOIRES.map((s) => (
             <button
               key={s.id}
               onClick={() => openStory(s)}
               className={[
-                "flex items-center gap-4 px-6 py-5 rounded-[2rem] relative overflow-hidden",
+                "flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 rounded-[1.5rem] sm:rounded-[2rem] relative overflow-hidden",
                 "shadow-[0_6px_20px_rgba(0,0,0,0.4)]",
                 "cursor-pointer select-none text-left",
                 "transition-all duration-200 hover:scale-[1.03] active:scale-95",
@@ -164,8 +164,8 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
                   borderRadius: "inherit",
                 }}
               />
-              <Icon name={s.icon} size={64} className="relative drop-shadow-lg flex-shrink-0" />
-              <span className="relative font-masque font-bold text-white text-xl leading-tight">
+              <Icon name={s.icon} size={64} className="w-12 h-12 sm:w-16 sm:h-16 relative drop-shadow-lg flex-shrink-0" />
+              <span className="relative font-masque font-bold text-white text-lg sm:text-xl leading-tight">
                 {s.title}
               </span>
             </button>
@@ -192,34 +192,34 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
       style={{ background: `linear-gradient(165deg, ${story.primary}26 0%, ${story.primary}0a 100%)` }}
     >
       {/* Barre du haut */}
-      <div className="flex items-center justify-between px-8 py-4 gap-4">
+      <div className="flex items-center justify-between px-3 sm:px-8 py-3 sm:py-4 gap-2 sm:gap-4">
         <button
           onClick={goBack}
-          className="flex items-center gap-2 font-masque font-bold text-brun text-xl px-6 py-3 rounded-[1.5rem] bg-white/70 hover:bg-white active:scale-95 transition-all min-w-[120px] min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
+          className="flex items-center gap-2 font-masque font-bold text-brun text-lg sm:text-xl px-4 sm:px-6 py-3 rounded-[1.5rem] bg-white/70 hover:bg-white active:scale-95 transition-all min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
         >
-          <Icon name="arrow-left" size={26} /> Retour
+          <Icon name="arrow-left" size={26} /> <span className="hidden sm:inline">Retour</span>
         </button>
 
-        <div className="flex items-center gap-3">
-          <Icon name={story.icon} size={40} />
-          <span className="font-masque font-bold text-brun text-2xl">{story.title}</span>
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Icon name={story.icon} size={40} className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
+          <span className="font-masque font-bold text-brun text-lg sm:text-2xl truncate">{story.title}</span>
         </div>
 
         {available ? (
           <button
             onClick={togglePause}
-            className="flex items-center justify-center gap-2 font-masque font-bold text-white text-xl px-6 py-3 rounded-[1.5rem] min-w-[120px] min-h-[56px] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
+            className="flex items-center justify-center gap-2 font-masque font-bold text-white text-lg sm:text-xl px-4 sm:px-6 py-3 rounded-[1.5rem] min-h-[56px] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
             style={{ backgroundColor: story.primary }}
           >
-            <Icon name={paused ? "play" : "pause"} size={24} /> {paused ? "Lire" : "Pause"}
+            <Icon name={paused ? "play" : "pause"} size={24} /> <span className="hidden sm:inline">{paused ? "Lire" : "Pause"}</span>
           </button>
         ) : (
-          <div className="min-w-[120px]" />
+          <div className="w-12 sm:min-w-[120px]" />
         )}
       </div>
 
       {/* Illustration + texte */}
-      <div className="flex-1 flex flex-col items-center justify-center px-12 gap-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-12 gap-4 sm:gap-8">
         <div
           className={reducedMotion ? "" : "animate-[slide-up_0.5s_cubic-bezier(0.34,1.56,0.64,1)]"}
           key={`icon-${pageIdx}`}
@@ -240,11 +240,11 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
       </div>
 
       {/* Navigation pages */}
-      <div className="flex items-center justify-center gap-6 pb-8">
+      <div className="flex items-center justify-center gap-4 sm:gap-6 pb-5 sm:pb-8">
         <button
           onClick={() => goPage(-1)}
           disabled={pageIdx === 0}
-          className="flex items-center justify-center text-brun w-[80px] h-[80px] rounded-full bg-white/80 hover:bg-white active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
+          className="flex items-center justify-center text-brun w-16 h-16 sm:w-[80px] sm:h-[80px] rounded-full bg-white/80 hover:bg-white active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
           aria-label="Page précédente"
         >
           <Icon name="arrow-left" size={38} />
@@ -268,7 +268,7 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         <button
           onClick={() => goPage(1)}
           disabled={pageIdx === story.pages.length - 1}
-          className="flex items-center justify-center text-brun w-[80px] h-[80px] rounded-full bg-white/80 hover:bg-white active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
+          className="flex items-center justify-center text-brun w-16 h-16 sm:w-[80px] sm:h-[80px] rounded-full bg-white/80 hover:bg-white active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
           aria-label="Page suivante"
         >
           <Icon name="arrow-right" size={38} />

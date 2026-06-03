@@ -357,16 +357,16 @@ export function ScenesActivity({ reducedMotion, volume = 0.7, intensity }: Activ
   // ── Sélecteur de scènes (écran idle) ──────────────────────────────────────
   if (!activeScene) {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-full gap-8 px-8 py-8">
-        <h2 className="font-masque font-bold text-brun text-4xl">Scènes Visuelles</h2>
-        <div className="grid grid-cols-2 gap-6 w-full max-w-[900px]">
+      <div className="mas-scroll flex flex-col items-center justify-center w-full h-full gap-5 sm:gap-8 px-4 sm:px-8 py-5 sm:py-8">
+        <h2 className="font-masque font-bold text-brun text-2xl sm:text-4xl">Scènes Visuelles</h2>
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-[900px]">
           {SCENES.map((scene) => (
             <button
               key={scene.id}
               onClick={() => launchScene(scene.id)}
               className={[
                 "flex flex-col items-center justify-end overflow-hidden",
-                "min-h-[200px] w-full rounded-[2rem]",
+                "min-h-[140px] sm:min-h-[200px] w-full rounded-[1.5rem] sm:rounded-[2rem]",
                 "cursor-pointer select-none transition-all duration-200",
                 "shadow-[0_8px_28px_rgba(0,0,0,0.35)]",
                 "active:scale-95 hover:scale-[1.04]",
@@ -374,11 +374,11 @@ export function ScenesActivity({ reducedMotion, volume = 0.7, intensity }: Activ
               ].join(" ")}
               style={{ backgroundColor: scene.tileColors.primary }}
             >
-              <div className="flex-1 flex items-center justify-center py-6">
-                <Icon name={scene.icon} size={92} className="select-none motion-safe:animate-[float_3s_ease-in-out_infinite]" />
+              <div className="flex-1 flex items-center justify-center py-4 sm:py-6">
+                <Icon name={scene.icon} size={92} className="w-16 h-16 sm:w-[92px] sm:h-[92px] select-none motion-safe:animate-[float_3s_ease-in-out_infinite]" />
               </div>
-              <div className="w-full px-4 py-4 text-center" style={{ backgroundColor: scene.tileColors.secondary }}>
-                <span className="font-masque font-bold text-white text-2xl">{scene.label}</span>
+              <div className="w-full px-3 py-3 sm:px-4 sm:py-4 text-center" style={{ backgroundColor: scene.tileColors.secondary }}>
+                <span className="font-masque font-bold text-white text-lg sm:text-2xl">{scene.label}</span>
               </div>
             </button>
           ))}

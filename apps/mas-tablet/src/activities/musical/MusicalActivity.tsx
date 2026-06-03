@@ -195,13 +195,13 @@ export function MusicalActivity({
   const maxLen = difficulty !== "cause-effet" ? MAX_LEN[difficulty] : 0;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full gap-8 px-8 py-6 select-none">
+    <div className="flex flex-col items-center justify-center w-full h-full gap-5 sm:gap-8 px-4 sm:px-8 py-4 sm:py-6 select-none">
       <div className="text-center">
-        <h2 className="font-masque font-bold text-brun text-4xl flex items-center justify-center gap-3">
-          <Icon name="music-note" size={40} /> Jeu Musical
+        <h2 className="font-masque font-bold text-brun text-2xl sm:text-4xl flex items-center justify-center gap-2 sm:gap-3">
+          <Icon name="music-note" size={40} className="w-7 h-7 sm:w-10 sm:h-10" /> Jeu Musical
         </h2>
         {gamePhase !== "idle" && (
-          <p className="font-masque text-brun/70 text-2xl mt-2 min-h-[2rem]">
+          <p className="font-masque text-brun/70 text-lg sm:text-2xl mt-2 min-h-[2rem] px-2">
             {instruction}
           </p>
         )}
@@ -212,7 +212,7 @@ export function MusicalActivity({
           onClick={startGame}
           autoFocus
           className={[
-            "font-masque font-bold text-white text-3xl px-16 py-8 rounded-[2rem]",
+            "font-masque font-bold text-white text-2xl sm:text-3xl px-10 sm:px-16 py-6 sm:py-8 rounded-[2rem]",
             "transition-all hover:scale-105 active:scale-95",
             "shadow-[0_6px_20px_rgba(0,0,0,0.3)]",
             "focus-visible:ring-[6px] focus-visible:ring-brun focus-visible:outline-none",

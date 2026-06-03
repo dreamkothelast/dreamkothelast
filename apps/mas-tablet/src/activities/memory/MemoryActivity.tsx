@@ -232,17 +232,17 @@ export function MemoryActivity({
       : "clamp(90px, 15vw, 170px)";
 
   return (
-    <div className="relative flex-1 flex flex-col items-center w-full h-full px-6 pb-6 pt-3 bg-gradient-to-b from-[#FFF1D6] to-[#FFF6E9]">
+    <div className="relative flex-1 flex flex-col items-center w-full h-full px-3 sm:px-6 pb-4 sm:pb-6 pt-3 bg-gradient-to-b from-[#FFF1D6] to-[#FFF6E9]">
 
       {/* Sélecteur de difficulté en haut */}
-      <div className="flex gap-3 mb-4 z-10">
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-3 sm:mb-4 z-10">
         {DIFF_LABELS.map(({ key, label, icon }) => (
           <button
             key={key}
             onClick={() => startWithDifficulty(key)}
             className={[
-              "flex items-center gap-2 font-masque font-bold text-base px-5 py-3 rounded-[1.5rem]",
-              "min-h-[52px] select-none cursor-pointer",
+              "flex items-center gap-2 font-masque font-bold text-sm sm:text-base px-3 sm:px-5 py-2 sm:py-3 rounded-[1.5rem]",
+              "min-h-[48px] sm:min-h-[52px] select-none cursor-pointer",
               "transition-all duration-200 active:scale-95",
               "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun",
               localDiff === key
@@ -257,8 +257,8 @@ export function MemoryActivity({
       </div>
 
       {/* Consigne */}
-      <div className="mb-4 pointer-events-none z-10">
-        <p className="font-masque text-brun/60 text-xl select-none text-center">
+      <div className="mb-3 sm:mb-4 pointer-events-none z-10 px-2">
+        <p className="font-masque text-brun/60 text-base sm:text-xl select-none text-center">
           {phase === "preview"
             ? "Regarde bien les images…"
             : cfg.causeEffet

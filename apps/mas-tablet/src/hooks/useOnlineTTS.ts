@@ -1,11 +1,17 @@
 /**
  * Synthèse vocale en ligne avec cache hors-ligne.
  *
- * Deux fournisseurs supportés automatiquement selon la clé :
+ * Trois fournisseurs supportés automatiquement selon la clé :
  *   • Token HuggingFace  (hf_...)  → GRATUIT — modèle facebook/mms-tts-fra
+ *   • Clé ElevenLabs     (sk_...)  → Payant   — voix naturelle multilingue FR
  *   • Clé OpenAI         (sk-...)  → Payant   — voix "nova" (tts-1)
  *
- * Dans les deux cas : cache localStorage (1 téléchargement = usage hors-ligne illimité).
+ * Dans tous les cas : cache localStorage (1 téléchargement = usage hors-ligne illimité).
+ *
+ * NB : les clips des comptines/histoires sont déjà PRÉ-GÉNÉRÉS (voix ElevenLabs
+ * via scripts/generate_voices_elevenlabs.mjs) et embarqués dans public/audio/ —
+ * playBundled() les joue hors-ligne. Ce module n'est qu'un FILET DE SECOURS
+ * pour du texte non pré-généré.
  */
 
 import { useCallback, useRef } from "react";
@@ -15,6 +21,10 @@ const CACHE_PREFIX    = "mas-tts-v1-";
 
 // ── Modèle HF pour le français ─────────────────────────────────────────────
 const HF_MODEL_FR = "facebook/mms-tts-fra";
+
+// ── ElevenLabs : voix FR par défaut (« Charlotte ») + modèle multilingue ─────
+const ELEVEN_VOICE_FR = "XB0fDUnXU5powFXDhCwa";
+const ELEVEN_MODEL    = "eleven_multilingual_v2";
 
 export interface OnlineTTSOptions {
   onEnd?:  () => void;
@@ -41,9 +51,10 @@ export const OnlineTTSConfig = {
       return n;
     } catch { return 0; }
   },
-  keyType: (key: string): "huggingface" | "openai" | "none" => {
+  keyType: (key: string): "huggingface" | "elevenlabs" | "openai" | "none" => {
     if (key.startsWith("hf_")) return "huggingface";
-    if (key.startsWith("sk-") || key.startsWith("sk-proj-")) return "openai";
+    if (key.startsWith("sk_")) return "elevenlabs";              // sk_… (underscore)
+    if (key.startsWith("sk-") || key.startsWith("sk-proj-")) return "openai"; // sk-… (tiret)
     return "none";
   },
 };
@@ -139,6 +150,33 @@ async function fetchHF(text: string, token: string, signal: AbortSignal): Promis
   return null;
 }
 
+// ── Appel ElevenLabs TTS ───────────────────────────────────────────────────
+async function fetchElevenLabs(text: string, apiKey: string, signal: AbortSignal): Promise<Blob | null> {
+  try {
+    const resp = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_FR}?output_format=mp3_44100_128`,
+      {
+        method: "POST",
+        signal,
+        headers: {
+          "xi-api-key": apiKey,
+          "Content-Type": "application/json",
+          "Accept": "audio/mpeg",
+        },
+        body: JSON.stringify({
+          text,
+          model_id: ELEVEN_MODEL,
+          voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.15, use_speaker_boost: true },
+        }),
+      }
+    );
+    if (!resp.ok) return null;
+    return await resp.blob();
+  } catch {
+    return null;
+  }
+}
+
 // ── Appel OpenAI TTS ───────────────────────────────────────────────────────
 async function fetchOpenAI(text: string, apiKey: string, speed: number, signal: AbortSignal): Promise<Blob | null> {
   try {
@@ -221,8 +259,9 @@ export function useOnlineTTS(volume = 1) {
     let dataUrl = getCached(ck);
 
     if (!dataUrl) {
-      const blob = type === "huggingface"
-        ? await fetchHF(text, key, abortRef.current.signal)
+      const blob =
+        type === "huggingface" ? await fetchHF(text, key, abortRef.current.signal)
+        : type === "elevenlabs" ? await fetchElevenLabs(text, key, abortRef.current.signal)
         : await fetchOpenAI(text, key, opts.speed ?? 0.88, abortRef.current.signal);
 
       if (!blob) return false;

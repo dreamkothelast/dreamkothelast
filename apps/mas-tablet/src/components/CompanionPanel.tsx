@@ -262,7 +262,7 @@ export function CompanionPanel({
           ))}
         </Row>
 
-        {/* Voix IA (OpenAI TTS) */}
+        {/* Voix IA (HuggingFace · ElevenLabs · OpenAI) */}
         <Row label="Voix IA" icon="mic">
           <div className="flex flex-col gap-3 w-full">
             <div className="flex items-center gap-2 flex-wrap">
@@ -270,7 +270,7 @@ export function CompanionPanel({
                 type={keyVisible ? "text" : "password"}
                 value={apiKey}
                 onChange={(e) => handleApiKeyChange(e.target.value)}
-                placeholder="sk-…  (clé API OpenAI)"
+                placeholder="hf_… · sk_… (ElevenLabs) · sk-… (OpenAI)"
                 spellCheck={false}
                 autoComplete="off"
                 className={[
@@ -300,7 +300,7 @@ export function CompanionPanel({
                   ? (
                     <>
                       <Icon name="check" size={16} />
-                      Voix IA active ({keyType === "huggingface" ? "HuggingFace" : "OpenAI"}) — {cacheCount} ligne{cacheCount !== 1 ? "s" : ""} en cache
+                      Voix IA active ({keyType === "huggingface" ? "HuggingFace" : keyType === "elevenlabs" ? "ElevenLabs" : "OpenAI"}) — {cacheCount} ligne{cacheCount !== 1 ? "s" : ""} en cache
                     </>
                   )
                   : "Sans token : voix Windows locale"}
@@ -322,6 +322,13 @@ export function CompanionPanel({
                 <span className="text-brun/70">huggingface.co</span> puis
                 allez dans Settings → Access Tokens → New Token (lecture seule).
                 Collez le token <span className="font-bold">hf_…</span> ici.
+              </p>
+              <p>
+                <strong>Voix la plus naturelle</strong> — clé{" "}
+                <span className="font-bold">ElevenLabs (sk_…)</span> depuis{" "}
+                <span className="text-brun/70">elevenlabs.io</span>. Les comptines
+                et histoires sont déjà enregistrées avec cette voix, embarquées et
+                lues hors-ligne — la clé ne sert qu'aux nouveaux textes.
               </p>
               <p>
                 L'audio est mis en cache : téléchargé une seule fois avec le WiFi,

@@ -6,6 +6,7 @@ import { CompanionPanel } from "./components/CompanionPanel";
 import { useSettings } from "./hooks/useSettings";
 import { useSessionTimer } from "./hooks/useSessionTimer";
 import { useAudio } from "./hooks/useAudio";
+import { useBackButton } from "./hooks/useBackButton";
 import { ACTIVITIES } from "./registry";
 import type { Screen } from "./types";
 
@@ -31,6 +32,18 @@ export default function App() {
   const openActivity = useCallback((id: string) => {
     setScreen({ type: "activity", id });
   }, []);
+
+  // Bouton « retour » Android : ferme le panneau ouvert, sinon revient à
+  // l'accueil. Sans effet sur la version Windows (pas de bouton retour).
+  // Le hook rappelle toujours la version la plus récente de ce callback,
+  // qui lit donc l'état courant directement.
+  useBackButton(() => {
+    if (companionOpen) {
+      setCompanionOpen(false);
+    } else if (screen.type !== "home") {
+      goHome();
+    }
+  });
 
   const openCelebration = useCallback(() => {
     playCelebration();

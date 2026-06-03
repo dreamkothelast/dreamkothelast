@@ -6,9 +6,22 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:portable": "tsc && vite build --config vite.config.portable.ts",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+
+    "//windows": "── VERSION WINDOWS (MAS sur tablette/PC) ──",
+    "win:portable": "tsc && vite build --config vite.config.portable.ts",
+    "win:dev": "tauri dev",
+    "win:build": "tauri build",
+
+    "//android": "── VERSION ANDROID (Play Store) ── (nécessite Android Studio + SDK/NDK)",
+    "android:init": "tauri android init",
+    "android:dev": "tauri android dev",
+    "android:build": "tauri android build",
+    "android:build:apk": "tauri android build --apk",
+
+    "//legacy": "── alias rétro-compatibles ──",
+    "build:portable": "tsc && vite build --config vite.config.portable.ts"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.1.1",

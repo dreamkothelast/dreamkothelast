@@ -1,0 +1,24 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "//": "Réglages SPÉCIFIQUES à la version Windows (bureau). Fusionné automatiquement par Tauri v2 lors d'un build Windows. N'affecte PAS la version Android.",
+  "app": {
+    "windows": [
+      {
+        "title": "MAS Tablette",
+        "width": 1920,
+        "height": 1080,
+        "resizable": false,
+        "center": true,
+        "decorations": true,
+        "alwaysOnTop": false,
+        "skipTaskbar": false,
+        "visible": true,
+        "focus": true
+      }
+    ]
+  },
+  "bundle": {
+    "targets": ["msi", "nsis"],
+    "windows": {}
+  }
+}

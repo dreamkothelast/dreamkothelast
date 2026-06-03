@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "MAS Tablette",
   "version": "0.1.0",
-  "identifier": "com.mas-tablette.app",
+  "identifier": "com.mastablette.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -10,20 +10,7 @@
     "beforeBuildCommand": "npm run build"
   },
   "app": {
-    "windows": [
-      {
-        "title": "MAS Tablette",
-        "width": 1920,
-        "height": 1080,
-        "resizable": false,
-        "center": true,
-        "decorations": true,
-        "alwaysOnTop": false,
-        "skipTaskbar": false,
-        "visible": true,
-        "focus": true
-      }
-    ],
+    "withGlobalTauri": true,
     "security": {
       "csp": null,
       "dangerousDisableAssetCspModification": false
@@ -31,7 +18,6 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -44,7 +30,6 @@
     "copyright": "",
     "category": "Education",
     "shortDescription": "Mini-jeux éducatifs MAS",
-    "longDescription": "Suite de mini-jeux sensoriels et éducatifs pour adultes en situation de handicap. 100 % hors-ligne.",
-    "windows": {}
+    "longDescription": "Suite de mini-jeux sensoriels et éducatifs pour adultes en situation de handicap. 100 % hors-ligne."
   }
 }

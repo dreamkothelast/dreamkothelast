@@ -1,0 +1,7 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "//": "Réglages SPÉCIFIQUES à la version Android (Play Store). Fusionné automatiquement par Tauri v2 lors d'un build Android. N'affecte PAS la version Windows. L'orientation, le nom affiché et les permissions se règlent dans le projet généré src-tauri/gen/android (voir docs/BUILD-ANDROID.md).",
+  "bundle": {
+    "targets": ["aab", "apk"]
+  }
+}

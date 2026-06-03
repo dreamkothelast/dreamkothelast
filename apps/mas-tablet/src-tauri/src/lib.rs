@@ -6,5 +6,5 @@
 pub fn run() {
     tauri::Builder::default()
         .run(tauri::generate_context!())
-        .expect("Erreur au lancement de l'application MAS Tablette");
+        .expect("Erreur au lancement de l'application");
 }

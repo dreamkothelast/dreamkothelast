@@ -1,7 +1,7 @@
 [package]
 name = "mas-tablet"
 version = "0.1.0"
-description = "MAS Tablette — Suite de mini-jeux éducatifs pour adultes en situation de handicap"
+description = "Suite de mini-jeux d'éveil sensoriel adaptés (handicap, neuroatypie). Windows : MAS Tablette — Public : Évelio."
 authors = []
 edition = "2021"
 

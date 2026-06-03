@@ -11,7 +11,7 @@ import { ACTIVITIES } from "./registry";
 import type { Screen } from "./types";
 
 /**
- * Application MAS Tablette — machine d'état principale.
+ * Application (Évelio / MAS Tablette) — machine d'état principale.
  *
  * Écrans : home → activity | celebration → home
  * Overlay : companion (panneau accompagnant, toujours accessible)

@@ -4,6 +4,7 @@ import { Mascot } from "../components/Mascot";
 import { ACTIVITIES } from "../registry";
 import type { ActivityDefinition } from "../types";
 import { useAudio } from "../hooks/useAudio";
+import { APP_NAME, APP_TAGLINE } from "../appName";
 
 interface HomeScreenProps {
   onSelectActivity: (id: string) => void;
@@ -48,10 +49,10 @@ export function HomeScreen({ onSelectActivity, volume, reducedMotion }: HomeScre
         />
         <div className="text-center">
           <h1 className="font-masque font-bold text-white text-2xl sm:text-4xl leading-tight drop-shadow-lg">
-            MAS Tablette
+            {APP_NAME}
           </h1>
           <p className="font-masque text-white/75 text-base sm:text-xl mt-0.5 drop-shadow">
-            Choisis ton activité
+            {APP_TAGLINE}
           </p>
         </div>
       </div>

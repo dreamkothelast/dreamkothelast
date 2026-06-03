@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "MAS Tablette",
+  "productName": "Évelio",
   "version": "0.1.0",
-  "identifier": "com.mastablette.app",
+  "identifier": "com.evelio.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -29,7 +29,7 @@
     "externalBin": [],
     "copyright": "",
     "category": "Education",
-    "shortDescription": "Mini-jeux éducatifs MAS",
-    "longDescription": "Suite de mini-jeux sensoriels et éducatifs pour adultes en situation de handicap. 100 % hors-ligne."
+    "shortDescription": "Jeux d'éveil sensoriel adaptés",
+    "longDescription": "Évelio — suite de mini-jeux d'éveil sensoriel et cognitif, pensés pour les personnes en situation de handicap et les profils neuroatypiques. Doux, coloré, accessible et 100 % hors-ligne."
   }
 }

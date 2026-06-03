@@ -1,6 +1,11 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "//": "Réglages SPÉCIFIQUES à la version Windows (bureau). Fusionné automatiquement par Tauri v2 lors d'un build Windows. N'affecte PAS la version Android.",
+  "//": "Réglages SPÉCIFIQUES à la version Windows (bureau, MAS). Fusionné automatiquement par Tauri v2 lors d'un build Windows. N'affecte PAS la version Android (publique = Évelio).",
+  "productName": "MAS Tablette",
+  "identifier": "com.mastablette.app",
+  "build": {
+    "beforeBuildCommand": "npm run build:win"
+  },
   "app": {
     "windows": [
       {

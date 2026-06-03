@@ -1,7 +1,14 @@
-# Version ANDROID — MAS Tablette (Google Play Store)
+# Version ANDROID — Évelio (Google Play Store)
 
-Cette page ne concerne **que la version Android**. Pour Windows, voir
+Cette page ne concerne **que la version Android**, publiée publiquement sous le
+nom **« Évelio »** (jeux d'éveil sensoriel adaptés). Pour Windows — livré à la
+structure sous le nom **« MAS Tablette »** — voir
 [`BUILD-WINDOWS.md`](./BUILD-WINDOWS.md).
+
+> ℹ️ **Nom public ≠ nom interne MAS.** Le nom affiché est piloté au build :
+> la version Android utilise le nom par défaut **Évelio** (fichier `.env`),
+> la version Windows force **MAS Tablette** (fichier `.env.windows`, mode
+> `--mode windows`). Même code React, deux marques.
 
 La version Android **réutilise exactement le même code React** que la version
 Windows (une seule source de vérité). Seule la configuration de packaging
@@ -51,8 +58,9 @@ npm run android:init
 Cela génère le projet Gradle dans **`src-tauri/gen/android/`**
 (ce dossier est volontairement ignoré par git — c'est du généré).
 
-L'identifiant de l'application est **`com.mastablette.app`**
-(défini dans `src-tauri/tauri.conf.json` → `identifier`).
+L'identifiant de l'application est **`com.evelio.app`**
+(défini dans `src-tauri/tauri.conf.json` → `identifier` ; la version Windows
+le ré-impose à `com.mastablette.app` via `tauri.windows.conf.json`).
 👉 Choisissez-le **définitivement avant le premier envoi au Play Store** :
 il ne pourra plus jamais être modifié ensuite.
 
@@ -69,7 +77,7 @@ npm run tauri -- icon chemin/vers/icone.png
 ### Nom affiché sous l'icône
 `src-tauri/gen/android/app/src/main/res/values/strings.xml` :
 ```xml
-<string name="app_name">MAS Tablette</string>
+<string name="app_name">Évelio</string>
 ```
 
 ### Orientation
@@ -120,14 +128,14 @@ src-tauri/gen/android/app/build/outputs/
 
 1. Créer une clé (une seule fois, **à conserver précieusement**) :
    ```bash
-   keytool -genkey -v -keystore mas-tablette.keystore \
-     -alias mas -keyalg RSA -keysize 2048 -validity 10000
+   keytool -genkey -v -keystore evelio.keystore \
+     -alias evelio -keyalg RSA -keysize 2048 -validity 10000
    ```
 2. Créer `src-tauri/gen/android/key.properties` :
    ```properties
-   storeFile=/chemin/absolu/mas-tablette.keystore
+   storeFile=/chemin/absolu/evelio.keystore
    storePassword=VOTRE_MOT_DE_PASSE
-   keyAlias=mas
+   keyAlias=evelio
    keyPassword=VOTRE_MOT_DE_PASSE
    ```
 3. Vérifier que `app/build.gradle.kts` lit bien ce fichier pour la config
@@ -142,7 +150,7 @@ src-tauri/gen/android/app/build/outputs/
 ## 7. Publier sur le Play Store
 
 1. Compte **Google Play Console** : 25 $ une fois — <https://play.google.com/console>
-2. *Créer une application* → langue, nom « MAS Tablette ».
+2. *Créer une application* → langue, nom « Évelio ».
 3. Téléverser le **`app-release.aab`** (piste *Test interne* d'abord).
 4. Remplir la fiche : description, captures d'écran (≥ 2), icône 512×512,
    bannière 1024×500, **politique de confidentialité** (URL obligatoire),
@@ -166,9 +174,10 @@ src-tauri/gen/android/app/build/outputs/
 
 | Fichier | Rôle | Impacte… |
 |---|---|---|
-| `src-tauri/tauri.conf.json` | Config **commune** (nom, version, identifiant, icône) | les deux |
-| `src-tauri/tauri.windows.conf.json` | Fenêtre bureau + cibles `.msi`/`.exe` | **Windows seul** |
-| `src-tauri/tauri.android.conf.json` | Cibles `.aab`/`.apk` | **Android seul** |
+| `src-tauri/tauri.conf.json` | Config **commune** + valeurs **publiques par défaut** (nom `Évelio`, identifiant `com.evelio.app`, icône) | les deux |
+| `src-tauri/tauri.windows.conf.json` | Fenêtre bureau, cibles `.msi`/`.exe`, **ré-impose `MAS Tablette` + `com.mastablette.app`** | **Windows seul** |
+| `src-tauri/tauri.android.conf.json` | Cibles `.aab`/`.apk` (hérite `Évelio`) | **Android seul** |
+| `.env` / `.env.windows` | Nom affiché **dans l'UI React** (`Évelio` / `MAS Tablette`) | front, par mode de build |
 | `src/` (React) | Interface **partagée**, responsive | les deux |
 
 Tauri fusionne automatiquement le bon fichier de plateforme : un build Windows

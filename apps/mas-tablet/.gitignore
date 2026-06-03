@@ -5,3 +5,6 @@ src-tauri/gen/
 dist-portable/
 # Build artifacts (packaged portable ZIPs)
 MAS-Tablette-*.zip
+
+# Captures d écran de validation (générées par scripts/screenshots.mjs)
+screenshots/

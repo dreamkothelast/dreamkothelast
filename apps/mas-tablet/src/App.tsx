@@ -80,6 +80,7 @@ export default function App() {
           timerPhase={phase}
           timerActive={isActive}
           bgColor="bg-creme"
+          showHome={false}
         >
           <HomeScreen
             onSelectActivity={openActivity}
@@ -98,6 +99,7 @@ export default function App() {
           timerPhase={phase}
           timerActive={isActive}
           bgColor="bg-creme"
+          reserveControls
         >
           <ActivityComponent
             difficulty={settings.difficulty}

@@ -12,6 +12,14 @@ interface GameShellProps {
   timerPhase: TimerPhase;
   timerActive: boolean;
   bgColor?: string;
+  /**
+   * Réserve une bande en haut/bas sur petit écran pour que le contenu de
+   * l'activité ne passe pas SOUS les boutons flottants Accueil / Réglages.
+   * Activé pour les activités, inutile pour l'accueil (contenu centré).
+   */
+  reserveControls?: boolean;
+  /** Affiche le bouton Accueil flottant. Masqué sur l'écran d'accueil (inutile). */
+  showHome?: boolean;
 }
 
 export function GameShell({
@@ -22,6 +30,8 @@ export function GameShell({
   timerPhase,
   timerActive,
   bgColor = "bg-creme",
+  reserveControls = false,
+  showHome = true,
 }: GameShellProps) {
   // Raccourci clavier Shift+F10 pour les accompagnants (clavier/contacteur)
   useEffect(() => {
@@ -39,14 +49,19 @@ export function GameShell({
     <div
       className={`relative w-full h-full flex flex-col overflow-hidden ${bgColor}`}
     >
-      {/* Bouton Accueil — haut-gauche, fixe, toujours visible */}
-      <HomeButton onClick={onHome} />
+      {/* Bouton Accueil — haut-gauche, fixe (masqué sur l'écran d'accueil) */}
+      {showHome && <HomeButton onClick={onHome} />}
 
       {/* Minuteur — haut-droit, discret */}
       <SessionTimer label={timerLabel} phase={timerPhase} isActive={timerActive} />
 
-      {/* Contenu de l'activité */}
-      <div className="flex-1 flex flex-col">
+      {/* Contenu de l'activité — sur mobile, dégage les boutons flottants */}
+      <div
+        className={[
+          "flex-1 flex flex-col min-h-0",
+          reserveControls ? "pt-[76px] sm:pt-0" : "",
+        ].join(" ")}
+      >
         {children}
       </div>
 

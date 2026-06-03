@@ -1,4 +1,5 @@
 import type { ActivityDefinition } from "../types";
+import { Icon } from "./Icon";
 
 interface BigTileProps {
   activity: ActivityDefinition;
@@ -36,13 +37,11 @@ export function BigTile({ activity, onClick, tabIndex = 0 }: BigTileProps) {
 
       {/* Icon area */}
       <div className="relative flex-1 flex items-center justify-center py-7">
-        <span
-          className="text-[84px] leading-none select-none motion-safe:animate-[float_3s_ease-in-out_infinite] drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]"
-          role="img"
-          aria-hidden="true"
-        >
-          {activity.icon}
-        </span>
+        <Icon
+          name={activity.icon}
+          size={104}
+          className="select-none motion-safe:animate-[float_3s_ease-in-out_infinite] drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]"
+        />
       </div>
 
       {/* Title band */}

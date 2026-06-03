@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useAudio } from "../../hooks/useAudio";
+import { Icon } from "../../components/Icon";
 import type { ActivityProps } from "../../types";
 
 // Palette de couleurs chaudes et douces pour les bulles
@@ -214,10 +215,12 @@ export function SensoryActivity({
   return (
     <div className="relative flex-1 w-full h-full overflow-hidden bg-gradient-to-b from-[#EBF7FF] to-[#FFF6E9]">
       {/* Titre discret en haut, centré */}
-      <div className="absolute top-0 left-0 right-0 flex justify-center pt-8 pointer-events-none z-10">
+      <div className="absolute top-0 left-0 right-0 flex justify-center items-center gap-3 pt-8 pointer-events-none z-10">
+        <Icon name="bubbles" size={36} className="select-none" />
         <p className="font-masque text-brun/40 text-2xl select-none">
-          ✨ Touche l&apos;écran pour faire apparaître des bulles ✨
+          Touche l&apos;écran pour faire apparaître des bulles
         </p>
+        <Icon name="bubbles" size={36} className="select-none" />
       </div>
 
       {/* Canvas plein écran — toute la surface est réactive */}

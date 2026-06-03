@@ -3,7 +3,7 @@
     {
       "id": "frere-jacques",
       "title": "Frère Jacques",
-      "emoji": "🔔",
+      "icon": "bell",
       "primary": "#E53935",
       "secondary": "#B71C1C",
       "lines": [
@@ -27,7 +27,7 @@
     {
       "id": "promenons-nous",
       "title": "Promenons-nous dans les bois",
-      "emoji": "🐺",
+      "icon": "wolf",
       "primary": "#388E3C",
       "secondary": "#1B5E20",
       "lines": [
@@ -52,7 +52,7 @@
     {
       "id": "petit-navire",
       "title": "Il était un petit navire",
-      "emoji": "⛵",
+      "icon": "sailboat",
       "primary": "#1565C0",
       "secondary": "#0D47A1",
       "lines": [
@@ -76,7 +76,7 @@
     {
       "id": "ainsi-font",
       "title": "Ainsi font les marionnettes",
-      "emoji": "🎭",
+      "icon": "party",
       "primary": "#7B1FA2",
       "secondary": "#4A148C",
       "lines": [
@@ -101,7 +101,7 @@
     {
       "id": "furet",
       "title": "Il court, il court le furet",
-      "emoji": "🐾",
+      "icon": "rabbit",
       "primary": "#E65100",
       "secondary": "#BF360C",
       "lines": [
@@ -126,7 +126,7 @@
     {
       "id": "alouette",
       "title": "Alouette",
-      "emoji": "🐦",
+      "icon": "bird",
       "primary": "#00897B",
       "secondary": "#004D40",
       "lines": [
@@ -151,7 +151,7 @@
     {
       "id": "pont-avignon",
       "title": "Sur le pont d'Avignon",
-      "emoji": "🌉",
+      "icon": "bridge",
       "primary": "#C0392B",
       "secondary": "#922B21",
       "lines": [
@@ -176,7 +176,7 @@
     {
       "id": "bateau-eau",
       "title": "Bateau sur l'eau",
-      "emoji": "🚣",
+      "icon": "rowboat",
       "primary": "#1976D2",
       "secondary": "#0D47A1",
       "lines": [
@@ -201,7 +201,7 @@
     {
       "id": "planter-choux",
       "title": "Savez-vous planter les choux",
-      "emoji": "🥬",
+      "icon": "cabbage",
       "primary": "#558B2F",
       "secondary": "#33691E",
       "lines": [
@@ -226,7 +226,7 @@
     {
       "id": "claire-fontaine",
       "title": "À la claire fontaine",
-      "emoji": "💧",
+      "icon": "drop",
       "primary": "#0288D1",
       "secondary": "#01579B",
       "lines": [
@@ -253,32 +253,32 @@
     {
       "id": "petit-chat",
       "title": "Le petit chat curieux",
-      "emoji": "🐱",
+      "icon": "cat",
       "primary": "#FF9800",
       "secondary": "#E65100",
       "pages": [
         {
-          "emoji": "🐱",
+          "icon": "cat",
           "text": "Il était une fois un petit chat tout doux qui s'appelait Minou."
         },
         {
-          "emoji": "🌳",
+          "icon": "tree",
           "text": "Un matin, Minou sortit dans le jardin. Le soleil brillait très fort."
         },
         {
-          "emoji": "🦋",
+          "icon": "butterfly",
           "text": "Il vit un joli papillon bleu qui dansait dans les fleurs."
         },
         {
-          "emoji": "🌸",
+          "icon": "flower",
           "text": "Minou voulut jouer avec lui. Il sauta, sauta, encore et encore !"
         },
         {
-          "emoji": "😺",
+          "icon": "smile",
           "text": "Le papillon se posa sur son nez. Minou ferma les yeux et ronronna."
         },
         {
-          "emoji": "❤️",
+          "icon": "heart",
           "text": "Et le soir, Minou s'endormit, heureux de sa belle journée. Bonne nuit, Minou !"
         }
       ]
@@ -286,32 +286,32 @@
     {
       "id": "etoile",
       "title": "La petite étoile",
-      "emoji": "⭐",
+      "icon": "star",
       "primary": "#3F51B5",
       "secondary": "#1A237E",
       "pages": [
         {
-          "emoji": "⭐",
+          "icon": "star",
           "text": "Tout là-haut dans le ciel vivait une petite étoile qui brillait."
         },
         {
-          "emoji": "🌙",
+          "icon": "moon",
           "text": "La nuit, elle veillait sur tous les enfants endormis."
         },
         {
-          "emoji": "✨",
+          "icon": "sparkle",
           "text": "Elle envoyait sa douce lumière par la fenêtre, comme un câlin."
         },
         {
-          "emoji": "😴",
+          "icon": "sleepy",
           "text": "Quand un enfant avait peur, l'étoile clignait pour le rassurer."
         },
         {
-          "emoji": "🌟",
+          "icon": "star",
           "text": "« Dors tranquille », disait-elle. « Je suis là, je te protège. »"
         },
         {
-          "emoji": "💙",
+          "icon": "heart",
           "text": "Et chaque matin, l'étoile s'endormait, contente d'avoir veillé. Doux rêves !"
         }
       ]
@@ -319,32 +319,32 @@
     {
       "id": "ours",
       "title": "Le gros ours câlin",
-      "emoji": "🐻",
+      "icon": "bear",
       "primary": "#795548",
       "secondary": "#3E2723",
       "pages": [
         {
-          "emoji": "🐻",
+          "icon": "bear",
           "text": "Dans la forêt vivait un gros ours tout doux qui adorait les câlins."
         },
         {
-          "emoji": "🌲",
+          "icon": "pine",
           "text": "Chaque jour, il se promenait entre les grands arbres verts."
         },
         {
-          "emoji": "🍯",
+          "icon": "honey",
           "text": "Il aimait beaucoup le miel doré, sucré et délicieux."
         },
         {
-          "emoji": "🐝",
+          "icon": "bee",
           "text": "Les abeilles étaient ses amies. Elles bourdonnaient autour de lui."
         },
         {
-          "emoji": "🤗",
+          "icon": "feeling-hug",
           "text": "Le soir, l'ours faisait un grand câlin à tous ses amis de la forêt."
         },
         {
-          "emoji": "💤",
+          "icon": "sleepy",
           "text": "Puis il se blottissait dans sa grotte bien chaude pour dormir. À demain !"
         }
       ]
@@ -352,32 +352,32 @@
     {
       "id": "bateau",
       "title": "Le petit bateau",
-      "emoji": "⛵",
+      "icon": "sailboat",
       "primary": "#00ACC1",
       "secondary": "#006064",
       "pages": [
         {
-          "emoji": "⛵",
+          "icon": "sailboat",
           "text": "Il y avait un petit bateau blanc qui voguait sur la mer bleue."
         },
         {
-          "emoji": "🌊",
+          "icon": "wave",
           "text": "Les vagues le berçaient doucement, comme un berceau."
         },
         {
-          "emoji": "🐬",
+          "icon": "dolphin",
           "text": "Des dauphins joueurs nageaient tout autour en sautant dans l'eau."
         },
         {
-          "emoji": "🐟",
+          "icon": "fish",
           "text": "Sous la mer, des poissons colorés brillaient comme des bijoux."
         },
         {
-          "emoji": "🌅",
+          "icon": "sunset",
           "text": "Le soleil se couchait, peignant le ciel en rose et orange."
         },
         {
-          "emoji": "⚓",
+          "icon": "anchor",
           "text": "Le petit bateau rentra au port, fatigué mais heureux. Quelle belle journée !"
         }
       ]
@@ -385,32 +385,32 @@
     {
       "id": "grenouille",
       "title": "La petite grenouille verte",
-      "emoji": "🐸",
+      "icon": "frog",
       "primary": "#43A047",
       "secondary": "#1B5E20",
       "pages": [
         {
-          "emoji": "🐸",
+          "icon": "frog",
           "text": "Dans la mare vivait une toute petite grenouille bien verte et bien douce."
         },
         {
-          "emoji": "🌿",
+          "icon": "leaf",
           "text": "Chaque matin, elle sautait de nénuphar en nénuphar en chantant."
         },
         {
-          "emoji": "🦟",
+          "icon": "bee",
           "text": "Elle attrapait les moustiques avec sa longue et rapide langue rose."
         },
         {
-          "emoji": "☔",
+          "icon": "umbrella",
           "text": "Quand il pleuvait, elle levait la tête et criait : « Coâ, coâ, coâ ! »"
         },
         {
-          "emoji": "🌞",
+          "icon": "sun",
           "text": "Et quand le soleil revenait, elle s'étirait doucement sur sa grande feuille."
         },
         {
-          "emoji": "💚",
+          "icon": "heart",
           "text": "La petite grenouille était heureuse, reine de sa jolie mare. Coâ !"
         }
       ]
@@ -418,32 +418,32 @@
     {
       "id": "lapin",
       "title": "Le lapin du jardin",
-      "emoji": "🐰",
+      "icon": "rabbit",
       "primary": "#F06292",
       "secondary": "#880E4F",
       "pages": [
         {
-          "emoji": "🐰",
+          "icon": "rabbit",
           "text": "Dans le grand jardin vivait un lapin aux longues oreilles blanches et douces."
         },
         {
-          "emoji": "🥕",
+          "icon": "carrot",
           "text": "Il adorait grignoter les carottes oranges et les feuilles de salade."
         },
         {
-          "emoji": "🌺",
+          "icon": "flower",
           "text": "Il courait parmi les fleurs colorées en faisant de grands bonds joyeux."
         },
         {
-          "emoji": "🐦",
+          "icon": "bird",
           "text": "Les oiseaux chantaient et le lapin écoutait, les oreilles bien dressées."
         },
         {
-          "emoji": "🌙",
+          "icon": "moon",
           "text": "Le soir, il rentrait dans son terrier bien douillet et bien chaud."
         },
         {
-          "emoji": "🐾",
+          "icon": "rabbit",
           "text": "Bonne nuit, petit lapin ! Demain, de nouvelles aventures t'attendent !"
         }
       ]
@@ -451,32 +451,32 @@
     {
       "id": "coccinelle",
       "title": "La coccinelle voyageuse",
-      "emoji": "🐞",
+      "icon": "ladybug",
       "primary": "#E53935",
       "secondary": "#B71C1C",
       "pages": [
         {
-          "emoji": "🐞",
+          "icon": "ladybug",
           "text": "Il y avait une belle coccinelle rouge avec sept points noirs sur le dos."
         },
         {
-          "emoji": "🌻",
+          "icon": "flower",
           "text": "Elle aimait voler de fleur en fleur dans le jardin ensoleillé."
         },
         {
-          "emoji": "☁️",
+          "icon": "cloud",
           "text": "Un jour, le vent l'emporta très loin, très haut au-dessus des nuages."
         },
         {
-          "emoji": "🌈",
+          "icon": "rainbow",
           "text": "Elle vit un magnifique arc-en-ciel et des prairies dorées à perte de vue."
         },
         {
-          "emoji": "🏠",
+          "icon": "home",
           "text": "Mais son cœur lui disait : « Rentre chez toi, c'est là que tu es heureuse. »"
         },
         {
-          "emoji": "🌺",
+          "icon": "flower",
           "text": "La coccinelle revint au jardin, plus heureuse que jamais d'être à la maison !"
         }
       ]
@@ -484,32 +484,32 @@
     {
       "id": "nuage",
       "title": "Le petit nuage blanc",
-      "emoji": "☁️",
+      "icon": "cloud",
       "primary": "#5C6BC0",
       "secondary": "#283593",
       "pages": [
         {
-          "emoji": "☁️",
+          "icon": "cloud",
           "text": "Haut dans le ciel bleu flottait un tout petit nuage blanc et doux."
         },
         {
-          "emoji": "🌬️",
+          "icon": "cloud",
           "text": "Le vent le promenait doucement au-dessus des maisons et des prés verts."
         },
         {
-          "emoji": "🌧️",
+          "icon": "drop",
           "text": "Quand les fleurs avaient soif, le nuage leur envoyait de la pluie douce."
         },
         {
-          "emoji": "🌸",
+          "icon": "flower",
           "text": "Les fleurs levaient la tête, souriaient et disaient merci au petit nuage."
         },
         {
-          "emoji": "🌅",
+          "icon": "sunset",
           "text": "Au coucher du soleil, le nuage devenait rose, puis orange, puis violet."
         },
         {
-          "emoji": "⭐",
+          "icon": "star",
           "text": "Et la nuit, le nuage se reposait, bercé tendrement par les étoiles. Dors bien !"
         }
       ]

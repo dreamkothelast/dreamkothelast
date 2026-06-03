@@ -13,51 +13,51 @@ import type { ImageTheme } from "../types";
  */
 export interface ImageItem {
   id: string;
-  emoji: string;
+  icon: string;         // nom d'icône SVG (voir src/components/Icon.tsx)
   label: string;        // nom français, lu/affiché
   sound?: string;       // chemin audio optionnel (Phase 4)
 }
 
 export const IMAGE_SETS: Record<ImageTheme, ImageItem[]> = {
   animaux: [
-    { id: "chien", emoji: "🐶", label: "Le chien", sound: "/assets/sounds/animaux/chien.mp3" },
-    { id: "chat", emoji: "🐱", label: "Le chat", sound: "/assets/sounds/animaux/chat.mp3" },
-    { id: "lapin", emoji: "🐰", label: "Le lapin" },
-    { id: "grenouille", emoji: "🐸", label: "La grenouille" },
-    { id: "lion", emoji: "🦁", label: "Le lion" },
-    { id: "elephant", emoji: "🐘", label: "L'éléphant" },
-    { id: "pingouin", emoji: "🐧", label: "Le pingouin" },
-    { id: "tortue", emoji: "🐢", label: "La tortue" },
+    { id: "chien", icon: "dog", label: "Le chien", sound: "/assets/sounds/animaux/chien.mp3" },
+    { id: "chat", icon: "cat", label: "Le chat", sound: "/assets/sounds/animaux/chat.mp3" },
+    { id: "lapin", icon: "rabbit", label: "Le lapin" },
+    { id: "grenouille", icon: "frog", label: "La grenouille" },
+    { id: "lion", icon: "lion", label: "Le lion" },
+    { id: "elephant", icon: "elephant", label: "L'éléphant" },
+    { id: "pingouin", icon: "penguin", label: "Le pingouin" },
+    { id: "tortue", icon: "turtle", label: "La tortue" },
   ],
   objets: [
-    { id: "voiture", emoji: "🚗", label: "La voiture" },
-    { id: "livre", emoji: "📚", label: "Le livre" },
-    { id: "ballon", emoji: "⚽", label: "Le ballon" },
-    { id: "balon-baudruche", emoji: "🎈", label: "Le ballon de baudruche" },
-    { id: "ours", emoji: "🧸", label: "L'ours en peluche" },
-    { id: "parapluie", emoji: "☂️", label: "Le parapluie" },
-    { id: "cle", emoji: "🔑", label: "La clé" },
-    { id: "horloge", emoji: "⏰", label: "Le réveil" },
+    { id: "voiture", icon: "car", label: "La voiture" },
+    { id: "livre", icon: "book", label: "Le livre" },
+    { id: "ballon", icon: "ball", label: "Le ballon" },
+    { id: "balon-baudruche", icon: "balloon", label: "Le ballon de baudruche" },
+    { id: "ours", icon: "teddy", label: "L'ours en peluche" },
+    { id: "parapluie", icon: "umbrella", label: "Le parapluie" },
+    { id: "cle", icon: "key", label: "La clé" },
+    { id: "horloge", icon: "clock", label: "Le réveil" },
   ],
   nourriture: [
-    { id: "pomme", emoji: "🍎", label: "La pomme" },
-    { id: "banane", emoji: "🍌", label: "La banane" },
-    { id: "fraise", emoji: "🍓", label: "La fraise" },
-    { id: "pizza", emoji: "🍕", label: "La pizza" },
-    { id: "carotte", emoji: "🥕", label: "La carotte" },
-    { id: "fromage", emoji: "🧀", label: "Le fromage" },
-    { id: "cookie", emoji: "🍪", label: "Le biscuit" },
-    { id: "glace", emoji: "🍦", label: "La glace" },
+    { id: "pomme", icon: "apple", label: "La pomme" },
+    { id: "banane", icon: "banana", label: "La banane" },
+    { id: "fraise", icon: "strawberry", label: "La fraise" },
+    { id: "pizza", icon: "pizza", label: "La pizza" },
+    { id: "carotte", icon: "carrot", label: "La carotte" },
+    { id: "fromage", icon: "cheese", label: "Le fromage" },
+    { id: "cookie", icon: "cookie", label: "Le biscuit" },
+    { id: "glace", icon: "icecream", label: "La glace" },
   ],
   instruments: [
-    { id: "guitare", emoji: "🎸", label: "La guitare" },
-    { id: "tambour", emoji: "🥁", label: "Le tambour" },
-    { id: "piano", emoji: "🎹", label: "Le piano" },
-    { id: "trompette", emoji: "🎺", label: "La trompette" },
-    { id: "violon", emoji: "🎻", label: "Le violon" },
-    { id: "saxophone", emoji: "🎷", label: "Le saxophone" },
-    { id: "maracas", emoji: "🪇", label: "Les maracas" },
-    { id: "cloche", emoji: "🔔", label: "La cloche" },
+    { id: "guitare", icon: "guitar", label: "La guitare" },
+    { id: "tambour", icon: "drum", label: "Le tambour" },
+    { id: "piano", icon: "piano", label: "Le piano" },
+    { id: "trompette", icon: "trumpet", label: "La trompette" },
+    { id: "violon", icon: "violin", label: "Le violon" },
+    { id: "saxophone", icon: "sax", label: "Le saxophone" },
+    { id: "maracas", icon: "maracas", label: "Les maracas" },
+    { id: "cloche", icon: "bell", label: "La cloche" },
   ],
 };
 

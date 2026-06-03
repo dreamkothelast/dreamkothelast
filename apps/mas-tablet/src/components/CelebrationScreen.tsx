@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Mascot } from "./Mascot";
 import { BigButton } from "./BigButton";
+import { Icon } from "./Icon";
 
 interface CelebrationScreenProps {
   onHome: () => void;
@@ -16,7 +17,7 @@ interface CelebrationScreenProps {
 export function CelebrationScreen({
   onHome,
   onContinue,
-  message = "Bravo ! 🎉",
+  message = "Bravo !",
   reducedMotion = false,
 }: CelebrationScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -116,7 +117,7 @@ export function CelebrationScreen({
             className="text-2xl px-10 py-5"
             aria-label="Retour à l'accueil"
           >
-            <span className="text-4xl mr-3" aria-hidden>🏠</span>
+            <Icon name="home" size={36} className="mr-3" />
             Accueil
           </BigButton>
 
@@ -127,7 +128,7 @@ export function CelebrationScreen({
               className="text-2xl px-10 py-5"
               aria-label="Rejouer"
             >
-              <span className="text-4xl mr-3" aria-hidden>🔄</span>
+              <Icon name="refresh" size={36} className="mr-3" />
               Rejouer
             </BigButton>
           )}

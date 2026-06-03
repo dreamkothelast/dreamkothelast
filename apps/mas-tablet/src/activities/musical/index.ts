@@ -4,7 +4,7 @@ import { MusicalActivity } from "./MusicalActivity";
 export const musicalActivity: ActivityDefinition = {
   id: "musical",
   title: "Jeu Musical",
-  icon: "🎵",
+  icon: "music-note",
   colors: {
     primary: "#AB47BC",   // violet doux
     secondary: "#6A1B9A", // violet profond

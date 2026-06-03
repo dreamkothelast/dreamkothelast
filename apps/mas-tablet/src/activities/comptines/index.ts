@@ -4,7 +4,7 @@ import { ComptinesActivity } from "./ComptinesActivity";
 export const comptinesActivity: ActivityDefinition = {
   id: "comptines",
   title: "Comptines",
-  icon: "🎵",
+  icon: "music-note",
   colors: {
     primary: "#E91E63",
     secondary: "#880E4F",

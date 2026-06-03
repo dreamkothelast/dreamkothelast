@@ -4,7 +4,7 @@ import { HistoiresActivity } from "./HistoiresActivity";
 export const histoiresActivity: ActivityDefinition = {
   id: "histoires",
   title: "Histoires",
-  icon: "📖",
+  icon: "book",
   colors: {
     primary: "#8E24AA",
     secondary: "#4A148C",

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { pickItems, shuffle, type ImageItem } from "../../data/imageSets";
+import { Icon } from "../../components/Icon";
 import type { ActivityProps, ImageTheme } from "../../types";
 import type { Difficulty } from "../../types";
 
@@ -8,25 +9,22 @@ import type { Difficulty } from "../../types";
 function CardBackFace() {
   return (
     <div
-      className="w-full h-full flex items-center justify-center relative overflow-hidden"
+      className="w-full h-full flex items-center justify-center relative overflow-hidden text-white"
       style={{
         background: "linear-gradient(135deg, #1565C0 0%, #6A1B9A 100%)",
       }}
     >
       {/* Étoiles aux coins */}
-      <span className="absolute top-[10%] left-[10%] text-[clamp(0.8rem,2.5vw,1.4rem)] opacity-70" aria-hidden>⭐</span>
-      <span className="absolute top-[10%] right-[10%] text-[clamp(0.8rem,2.5vw,1.4rem)] opacity-70" aria-hidden>⭐</span>
-      <span className="absolute bottom-[10%] left-[10%] text-[clamp(0.8rem,2.5vw,1.4rem)] opacity-70" aria-hidden>⭐</span>
-      <span className="absolute bottom-[10%] right-[10%] text-[clamp(0.8rem,2.5vw,1.4rem)] opacity-70" aria-hidden>⭐</span>
+      <Icon name="star" size={20} className="absolute top-[10%] left-[10%] opacity-80" />
+      <Icon name="star" size={20} className="absolute top-[10%] right-[10%] opacity-80" />
+      <Icon name="star" size={20} className="absolute bottom-[10%] left-[10%] opacity-80" />
+      <Icon name="star" size={20} className="absolute bottom-[10%] right-[10%] opacity-80" />
       {/* Centre */}
-      <span
-        className="text-[clamp(2rem,8vw,4.5rem)] leading-none select-none"
-        role="img"
-        aria-hidden
+      <Icon
+        name="question"
+        size={64}
         style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))" }}
-      >
-        ❓
-      </span>
+      />
     </div>
   );
 }
@@ -46,15 +44,15 @@ function gridConfig(difficulty: Difficulty) {
 }
 
 const DIFF_LABELS: { key: Difficulty; label: string; icon: string }[] = [
-  { key: "cause-effet", label: "Découverte", icon: "👆" },
-  { key: "facile",      label: "Facile",     icon: "🌟" },
-  { key: "normal",      label: "Normal",     icon: "🧠" },
+  { key: "cause-effet", label: "Découverte", icon: "hand" },
+  { key: "facile",      label: "Facile",     icon: "star" },
+  { key: "normal",      label: "Normal",     icon: "target" },
 ];
 
 interface Card {
   key: number;
   itemId: string;
-  emoji: string;
+  icon: string;
   label: string;
   flipped: boolean;
   matched: boolean;
@@ -71,7 +69,7 @@ function buildDeck(theme: ImageTheme, cfg: ReturnType<typeof gridConfig>): Card[
   return items.map((it, i) => ({
     key: i,
     itemId: it.id,
-    emoji: it.emoji,
+    icon: it.icon,
     label: it.label,
     flipped: false,
     matched: false,
@@ -243,7 +241,7 @@ export function MemoryActivity({
             key={key}
             onClick={() => startWithDifficulty(key)}
             className={[
-              "font-masque font-bold text-base px-5 py-3 rounded-[1.5rem]",
+              "flex items-center gap-2 font-masque font-bold text-base px-5 py-3 rounded-[1.5rem]",
               "min-h-[52px] select-none cursor-pointer",
               "transition-all duration-200 active:scale-95",
               "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun",
@@ -253,7 +251,7 @@ export function MemoryActivity({
             ].join(" ")}
             aria-pressed={localDiff === key}
           >
-            {icon} {label}
+            <Icon name={icon} size={22} /> {label}
           </button>
         ))}
       </div>
@@ -262,10 +260,10 @@ export function MemoryActivity({
       <div className="mb-4 pointer-events-none z-10">
         <p className="font-masque text-brun/60 text-xl select-none text-center">
           {phase === "preview"
-            ? "👀 Regarde bien les images…"
+            ? "Regarde bien les images…"
             : cfg.causeEffet
-            ? "👆 Touche les cartes pour les retourner"
-            : "🧩 Retrouve les paires identiques"}
+            ? "Touche les cartes pour les retourner"
+            : "Retrouve les paires identiques"}
         </p>
       </div>
 
@@ -322,24 +320,21 @@ export function MemoryActivity({
                         : "bg-creme border-soleil",
                     ].join(" ")}
                   >
-                    <span
-                      className="text-[clamp(2.5rem,10vw,5.5rem)] leading-none"
-                      role="img"
-                      aria-hidden="true"
-                    >
-                      {card.emoji}
-                    </span>
+                    <Icon
+                      name={card.icon}
+                      title={card.label}
+                      style={{ width: "clamp(2.8rem,11vw,6rem)", height: "auto" }}
+                    />
                     <span className="font-masque font-bold text-brun text-[clamp(0.75rem,1.8vw,1.1rem)] leading-tight px-2 text-center">
                       {card.label}
                     </span>
 
                     {card.matched && !reducedMotion && (
-                      <span
-                        className="absolute -top-2 -right-2 text-3xl motion-safe:animate-[wiggle_0.6s_ease-in-out]"
-                        aria-hidden
-                      >
-                        ✨
-                      </span>
+                      <Icon
+                        name="sparkle"
+                        size={32}
+                        className="absolute -top-2 -right-2 motion-safe:animate-[wiggle_0.6s_ease-in-out]"
+                      />
                     )}
                   </div>
                 </div>

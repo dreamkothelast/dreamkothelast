@@ -126,7 +126,7 @@ function Face5() {
 }
 
 const PAIN_LEVELS: PainLevel[] = [
-  { level: 0, label: "Pas de douleur",    sublabel: "😊 Aucune douleur",     bg: "#4CAF50", ring: "#2E7D32", noteHz: 523.2, face: <Face0 /> },
+  { level: 0, label: "Pas de douleur",    sublabel: "Aucune douleur",        bg: "#4CAF50", ring: "#2E7D32", noteHz: 523.2, face: <Face0 /> },
   { level: 1, label: "Très légère",       sublabel: "À peine perceptible",    bg: "#8BC34A", ring: "#558B2F", noteHz: 493.9, face: <Face1 /> },
   { level: 2, label: "Légère",            sublabel: "Gêne légère",            bg: "#FFC107", ring: "#F57F17", noteHz: 440.0, face: <Face2 /> },
   { level: 3, label: "Modérée",           sublabel: "Douleur présente",       bg: "#FF9800", ring: "#E65100", noteHz: 392.0, face: <Face3 /> },

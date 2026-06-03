@@ -1,6 +1,7 @@
-import { useRef, useCallback, useState, type KeyboardEvent } from "react";
+import { useRef, useCallback, useState, type KeyboardEvent, type ReactNode } from "react";
 import type { Settings, Difficulty, Intensity, ImageTheme } from "../types";
 import { BigButton } from "./BigButton";
+import { Icon } from "./Icon";
 import { OnlineTTSConfig } from "../hooks/useOnlineTTS";
 
 interface CompanionPanelProps {
@@ -12,10 +13,13 @@ interface CompanionPanelProps {
   timerActive: boolean;
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({ label, icon, children }: { label: string; icon?: string; children: ReactNode }) {
   return (
     <div className="flex items-center gap-4 py-3 border-b border-brun/10 last:border-0">
-      <span className="font-masque text-brun text-xl min-w-[200px]">{label}</span>
+      <span className="font-masque text-brun text-xl min-w-[200px] inline-flex items-center gap-2">
+        {icon && <Icon name={icon} size={24} />}
+        {label}
+      </span>
       <div className="flex flex-wrap gap-3">{children}</div>
     </div>
   );
@@ -25,13 +29,15 @@ interface OptionButtonProps {
   label: string;
   active: boolean;
   onClick: () => void;
-  emoji?: string;
+  icon?: string;
+  iconColor?: string;
 }
-function OptionButton({ label, active, onClick, emoji }: OptionButtonProps) {
+function OptionButton({ label, active, onClick, icon, iconColor }: OptionButtonProps) {
   return (
     <button
       onClick={onClick}
       className={[
+        "inline-flex items-center justify-center gap-2",
         "min-w-[100px] min-h-[56px] px-4 py-2 rounded-mas border-3",
         "font-masque font-semibold text-lg text-brun",
         "transition-all duration-200 cursor-pointer",
@@ -42,7 +48,7 @@ function OptionButton({ label, active, onClick, emoji }: OptionButtonProps) {
       ].join(" ")}
       aria-pressed={active}
     >
-      {emoji && <span className="mr-1" aria-hidden>{emoji}</span>}
+      {icon && <Icon name={icon} size={22} style={iconColor ? { color: iconColor } : undefined} />}
       {label}
     </button>
   );
@@ -102,24 +108,24 @@ export function CompanionPanel({
     { label: "30 min", value: 30 },
   ];
 
-  const DIFFICULTIES: { label: string; value: Difficulty; emoji: string }[] = [
-    { label: "Cause-effet", value: "cause-effet", emoji: "🟢" },
-    { label: "Facile", value: "facile", emoji: "🔵" },
-    { label: "Normal", value: "normal", emoji: "🟡" },
+  const DIFFICULTIES: { label: string; value: Difficulty; color: string }[] = [
+    { label: "Cause-effet", value: "cause-effet", color: "#43A047" },
+    { label: "Facile", value: "facile", color: "#1E88E5" },
+    { label: "Normal", value: "normal", color: "#F9A825" },
   ];
 
-  const VOLUMES = [
-    { label: "Silence", value: 0, emoji: "🔇" },
-    { label: "Doux", value: 0.4, emoji: "🔉" },
-    { label: "Normal", value: 0.7, emoji: "🔊" },
-    { label: "Fort", value: 1, emoji: "📢" },
+  const VOLUMES: { label: string; value: number; icon: string }[] = [
+    { label: "Silence", value: 0, icon: "volume-mute" },
+    { label: "Doux", value: 0.4, icon: "volume-low" },
+    { label: "Normal", value: 0.7, icon: "volume-high" },
+    { label: "Fort", value: 1, icon: "megaphone" },
   ];
 
-  const THEMES: { label: string; value: ImageTheme; emoji: string }[] = [
-    { label: "Animaux", value: "animaux", emoji: "🐾" },
-    { label: "Objets", value: "objets", emoji: "🧸" },
-    { label: "Nourriture", value: "nourriture", emoji: "🍎" },
-    { label: "Instruments", value: "instruments", emoji: "🎵" },
+  const THEMES: { label: string; value: ImageTheme; icon: string }[] = [
+    { label: "Animaux", value: "animaux", icon: "dog" },
+    { label: "Objets", value: "objets", icon: "teddy" },
+    { label: "Nourriture", value: "nourriture", icon: "apple" },
+    { label: "Instruments", value: "instruments", icon: "guitar" },
   ];
 
   return (
@@ -142,8 +148,8 @@ export function CompanionPanel({
       >
         {/* En-tête */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-masque font-bold text-brun text-4xl">
-            ⚙️ Réglages
+          <h2 className="font-masque font-bold text-brun text-4xl inline-flex items-center gap-3">
+            <Icon name="gear" size={36} /> Réglages
           </h2>
           <button
             onClick={onClose}
@@ -156,12 +162,12 @@ export function CompanionPanel({
             ].join(" ")}
             aria-label="Fermer le panneau"
           >
-            ✕
+            <Icon name="close" size={24} />
           </button>
         </div>
 
         {/* Minuteur de session */}
-        <Row label="⏱ Minuteur">
+        <Row label="Minuteur" icon="clock">
           {DURATIONS.map((d) => (
             <OptionButton
               key={String(d.value)}
@@ -175,88 +181,89 @@ export function CompanionPanel({
         {/* Démarrer / arrêter le minuteur */}
         <Row label="">
           {timerActive ? (
-            <BigButton onClick={onStopTimer} color="bg-corail-clair" className="px-6 py-3 text-lg">
-              ⏹ Arrêter le minuteur
+            <BigButton onClick={onStopTimer} color="bg-corail-clair" className="px-6 py-3 text-lg inline-flex items-center gap-2">
+              <Icon name="stop" size={22} /> Arrêter le minuteur
             </BigButton>
           ) : (
             <BigButton
               onClick={onStartTimer}
               color="bg-vert-clair"
-              className="px-6 py-3 text-lg"
+              className="px-6 py-3 text-lg inline-flex items-center gap-2"
               disabled={!settings.timerDuration}
             >
-              ▶️ Démarrer le minuteur
+              <Icon name="play" size={22} /> Démarrer le minuteur
             </BigButton>
           )}
         </Row>
 
         {/* Niveau de difficulté */}
-        <Row label="🎯 Niveau">
+        <Row label="Niveau" icon="target">
           {DIFFICULTIES.map((d) => (
             <OptionButton
               key={d.value}
               label={d.label}
               active={settings.difficulty === d.value}
               onClick={() => onUpdate({ difficulty: d.value })}
-              emoji={d.emoji}
+              icon="dot"
+              iconColor={d.color}
             />
           ))}
         </Row>
 
         {/* Volume */}
-        <Row label="🔊 Volume">
+        <Row label="Volume" icon="volume-high">
           {VOLUMES.map((v) => (
             <OptionButton
               key={v.value}
               label={v.label}
               active={settings.volume === v.value}
               onClick={() => onUpdate({ volume: v.value })}
-              emoji={v.emoji}
+              icon={v.icon}
             />
           ))}
         </Row>
 
         {/* Intensité visuelle */}
-        <Row label="🎨 Intensité">
+        <Row label="Intensité" icon="palette">
           <OptionButton
             label="Doux"
             active={settings.intensity === "doux"}
             onClick={() => onUpdate({ intensity: "doux" as Intensity })}
-            emoji="🌸"
+            icon="flower"
           />
           <OptionButton
             label="Vif"
             active={settings.intensity === "vif"}
             onClick={() => onUpdate({ intensity: "vif" as Intensity })}
-            emoji="✨"
+            icon="sparkle"
           />
         </Row>
 
         {/* Animations réduites */}
-        <Row label="♿ Accessibilité">
+        <Row label="Accessibilité" icon="accessibility">
           <OptionButton
             label="Animations réduites"
             active={settings.reducedMotion}
             onClick={() => onUpdate({ reducedMotion: !settings.reducedMotion })}
-            emoji={settings.reducedMotion ? "✅" : "⬜"}
+            icon="check"
           />
         </Row>
 
         {/* Thème d'images */}
-        <Row label="🖼 Thème">
+        <Row label="Thème" icon="image">
           {THEMES.map((t) => (
             <OptionButton
               key={t.value}
               label={t.label}
               active={settings.theme === t.value}
               onClick={() => onUpdate({ theme: t.value })}
-              emoji={t.emoji}
+              icon={t.icon}
             />
           ))}
         </Row>
 
         {/* Voix IA (OpenAI TTS) */}
-        <Row label="🎙 Voix IA">
+        <Row label="Voix IA" icon="mic">
           <div className="flex flex-col gap-3 w-full">
             <div className="flex items-center gap-2 flex-wrap">
               <input
@@ -275,38 +282,43 @@ export function CompanionPanel({
               />
               <button
                 onClick={() => setKeyVisible(v => !v)}
-                className="min-w-[56px] min-h-[56px] rounded-mas border-3 border-brun/20 bg-creme text-2xl active:scale-95 transition-all"
+                className="min-w-[56px] min-h-[56px] rounded-mas border-3 border-brun/20 bg-creme flex items-center justify-center active:scale-95 transition-all"
                 aria-label={keyVisible ? "Masquer la clé" : "Afficher la clé"}
               >
-                {keyVisible ? "🙈" : "👁️"}
+                <Icon name={keyVisible ? "eye-off" : "eye"} size={28} />
               </button>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
               <span className={[
-                "font-masque text-base px-3 py-1 rounded-full",
+                "font-masque text-base px-3 py-1 rounded-full inline-flex items-center gap-2",
                 isKeyValid
                   ? "bg-green-100 text-green-800"
                   : "bg-brun/10 text-brun/50",
               ].join(" ")}>
                 {isKeyValid
-                  ? `✅ Voix IA active (${keyType === "huggingface" ? "HuggingFace 🆓" : "OpenAI"}) — ${cacheCount} ligne${cacheCount !== 1 ? "s" : ""} en cache`
-                  : "⬜ Sans token : voix Windows locale"}
+                  ? (
+                    <>
+                      <Icon name="check" size={16} />
+                      Voix IA active ({keyType === "huggingface" ? "HuggingFace" : "OpenAI"}) — {cacheCount} ligne{cacheCount !== 1 ? "s" : ""} en cache
+                    </>
+                  )
+                  : "Sans token : voix Windows locale"}
               </span>
 
               {cacheCount > 0 && (
                 <button
                   onClick={handleClearCache}
-                  className="font-masque text-base text-brun/50 underline active:scale-95 transition-all"
+                  className="font-masque text-base text-brun/50 underline active:scale-95 transition-all inline-flex items-center gap-1"
                 >
-                  🗑 Vider le cache
+                  <Icon name="trash" size={16} /> Vider le cache
                 </button>
               )}
             </div>
 
             <div className="font-masque text-brun/50 text-sm leading-snug max-w-[600px] flex flex-col gap-1">
               <p>
-                🆓 <strong>Option gratuite</strong> — Créez un compte sur{" "}
+                <strong>Option gratuite</strong> — Créez un compte sur{" "}
                 <span className="text-brun/70">huggingface.co</span> puis
                 allez dans Settings → Access Tokens → New Token (lecture seule).
                 Collez le token <span className="font-bold">hf_…</span> ici.

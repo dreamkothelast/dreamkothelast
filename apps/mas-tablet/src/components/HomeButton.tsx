@@ -1,3 +1,5 @@
+import { Icon } from "./Icon";
+
 interface HomeButtonProps {
   onClick: () => void;
 }
@@ -23,7 +25,7 @@ export function HomeButton({ onClick }: HomeButtonProps) {
       ].join(" ")}
       aria-label="Retour à l'accueil"
     >
-      <span className="text-3xl" role="img" aria-hidden>🏠</span>
+      <Icon name="home" size={30} />
       <span className="text-lg leading-tight">Accueil</span>
     </button>
   );

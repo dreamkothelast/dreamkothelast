@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect, type ChangeEvent } from "reac
 import { useAudio } from "../../hooks/useAudio";
 import { useSpeech } from "../../hooks/useSpeech";
 import type { ActivityProps } from "../../types";
+import { Icon } from "../../components/Icon";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface StoredPhoto {
@@ -144,9 +145,9 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
         <div className="flex items-center justify-between px-6 py-4 bg-black/80 gap-4 z-10">
           <button
             onClick={closeFullscreen}
-            className="font-masque font-bold text-white text-xl px-6 py-3 rounded-[1.5rem] bg-white/20 hover:bg-white/30 active:scale-95 transition-all min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
+            className="font-masque font-bold text-white text-xl px-6 py-3 rounded-[1.5rem] bg-white/20 hover:bg-white/30 active:scale-95 transition-all min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white inline-flex items-center gap-2"
           >
-            ← Retour
+            <Icon name="arrow-left" size={22} /> Retour
           </button>
 
           <div className="flex gap-3">
@@ -156,7 +157,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
                   onClick={deletePhoto}
                   className="font-masque font-bold text-white text-xl px-6 py-3 rounded-[1.5rem] bg-red-600 hover:bg-red-700 active:scale-95 transition-all min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-300"
                 >
-                  Confirmer la suppression 🗑️
+                  <Icon name="trash" size={22} className="mr-2" /> Confirmer la suppression
                 </button>
                 <button
                   onClick={() => setDeleteConfirm(false)}
@@ -170,7 +171,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
                 onClick={() => setDeleteConfirm(true)}
                 className="font-masque font-bold text-white text-xl px-6 py-3 rounded-[1.5rem] bg-red-700/60 hover:bg-red-700/80 active:scale-95 transition-all min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-300"
               >
-                🗑️ Supprimer
+                <Icon name="trash" size={22} className="mr-2" /> Supprimer
               </button>
             )}
           </div>
@@ -208,7 +209,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
                 onClick={saveRename}
                 className="font-masque font-bold text-white text-2xl px-6 py-3 rounded-[1.5rem] bg-vert active:scale-95 transition-all min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-vert"
               >
-                ✓
+                <Icon name="check" size={26} />
               </button>
             </div>
           ) : (
@@ -218,7 +219,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
               aria-label="Modifier le nom"
             >
               {selected.name}
-              <span className="text-2xl opacity-60">✏️</span>
+              <Icon name="pencil" size={28} className="opacity-60" />
             </button>
           )}
         </div>
@@ -232,7 +233,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
       {/* En-tête */}
       <div className="flex items-center justify-between px-8 py-5">
         <div>
-          <h2 className="font-masque font-bold text-brun text-4xl">📷 Mes Photos</h2>
+          <h2 className="font-masque font-bold text-brun text-4xl inline-flex items-center gap-3"><Icon name="camera" size={40} /> Mes Photos</h2>
           <p className="font-masque text-brun/50 text-lg mt-0.5">
             {photos.length === 0
               ? "Ajoute les photos de tes proches"
@@ -254,7 +255,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
           ].join(" ")}
           style={{ backgroundColor: "#FF6F00" }}
         >
-          <span className="text-3xl" aria-hidden>📷</span>
+          <Icon name="camera" size={32} />
           Ajouter une photo
         </button>
 
@@ -276,7 +277,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
             className="w-48 h-48 rounded-[3rem] flex items-center justify-center"
             style={{ backgroundColor: "#FF6F00" + "22" }}
           >
-            <span className="text-8xl" role="img">📷</span>
+            <Icon name="camera" size={120} />
           </div>
           <div className="text-center">
             <p className="font-masque font-bold text-brun text-3xl">Aucune photo pour l'instant</p>
@@ -289,7 +290,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
             className="font-masque font-bold text-white text-3xl px-12 py-6 rounded-[2rem] cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-[0_8px_28px_rgba(0,0,0,0.3)] focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-brun"
             style={{ backgroundColor: "#FF6F00" }}
           >
-            📷 Ajouter une photo
+            <Icon name="camera" size={36} className="mr-3" /> Ajouter une photo
           </button>
         </div>
       )}

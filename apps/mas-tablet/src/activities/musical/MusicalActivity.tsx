@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAudio } from "../../hooks/useAudio";
+import { Icon } from "../../components/Icon";
 import type { ActivityProps, Difficulty } from "../../types";
 
 // 4 pads — notes de la gamme pentatonique (do, mi, sol, la)
@@ -11,8 +12,8 @@ const PADS = [
 ] as const;
 
 const ENCOURAGEMENTS = [
-  "Bravo ! 🎉", "Super ! ⭐", "Bien joué ! 👏",
-  "Génial ! 🌟", "Magnifique ! 🎶", "Oui ! 🎵",
+  "Bravo !", "Super !", "Bien joué !",
+  "Génial !", "Magnifique !", "Oui !",
 ];
 
 const MAX_LEN: Record<Difficulty, number> = {
@@ -187,16 +188,18 @@ export function MusicalActivity({
 
   const instruction =
     gamePhase === "idle" ? "" :
-    difficulty === "cause-effet" ? "Appuie sur n'importe quelle touche ! 🎵" :
-    gamePhase === "watch" ? "Regarde bien... 👀" :
-    "À ton tour ! 👆";
+    difficulty === "cause-effet" ? "Appuie sur n'importe quelle touche !" :
+    gamePhase === "watch" ? "Regarde bien..." :
+    "À ton tour !";
 
   const maxLen = difficulty !== "cause-effet" ? MAX_LEN[difficulty] : 0;
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full gap-8 px-8 py-6 select-none">
       <div className="text-center">
-        <h2 className="font-masque font-bold text-brun text-4xl">🎵 Jeu Musical</h2>
+        <h2 className="font-masque font-bold text-brun text-4xl flex items-center justify-center gap-3">
+          <Icon name="music-note" size={40} /> Jeu Musical
+        </h2>
         {gamePhase !== "idle" && (
           <p className="font-masque text-brun/70 text-2xl mt-2 min-h-[2rem]">
             {instruction}
@@ -216,7 +219,7 @@ export function MusicalActivity({
           ].join(" ")}
           style={{ backgroundColor: "#7B1FA2" }}
         >
-          Commencer 🎶
+          Commencer
         </button>
       ) : (
         <div className="grid grid-cols-2 gap-6 w-full max-w-[680px]">
@@ -247,7 +250,7 @@ export function MusicalActivity({
                 aria-label={pad.label}
                 aria-pressed={lit}
               >
-                <span className="text-5xl leading-none select-none">♪</span>
+                <Icon name="note" size={52} className="select-none" />
                 <span>{pad.label}</span>
               </button>
             );

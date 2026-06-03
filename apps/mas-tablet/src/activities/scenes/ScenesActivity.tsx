@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useAudio } from "../../hooks/useAudio";
+import { Icon } from "../../components/Icon";
 import type { ActivityProps } from "../../types";
 
 // ── Définitions de scènes ───────────────────────────────────────────────────
@@ -9,7 +10,7 @@ type SceneId = "foret" | "ocean" | "etoiles" | "prairie";
 interface SceneConfig {
   id: SceneId;
   label: string;
-  emoji: string;
+  icon: string;
   tileColors: { primary: string; secondary: string };
   bgTop: string;
   bgBottom: string;
@@ -22,45 +23,45 @@ const SCENES: SceneConfig[] = [
   {
     id: "foret",
     label: "Forêt",
-    emoji: "🌲",
+    icon: "pine",
     tileColors: { primary: "#388E3C", secondary: "#1B5E20" },
     bgTop: "#0d2b0d",
     bgBottom: "#1a4a1a",
     particleColors: ["#8FD94B", "#C4EE8A", "#FFD700", "#ADFF2F", "#90EE90"],
-    hint: "Touche pour faire apparaître des lucioles ✨",
+    hint: "Touche pour faire apparaître des lucioles",
     noteHz: 261.6,
   },
   {
     id: "ocean",
     label: "Océan",
-    emoji: "🌊",
+    icon: "wave",
     tileColors: { primary: "#0288D1", secondary: "#01579B" },
     bgTop: "#020c1a",
     bgBottom: "#0a2a4a",
     particleColors: ["#4FC3F7", "#81D4FA", "#80D8FF", "#B3E5FC", "#E1F5FE"],
-    hint: "Touche pour créer des vagues 🌊",
+    hint: "Touche pour créer des vagues",
     noteHz: 293.7,
   },
   {
     id: "etoiles",
     label: "Étoiles",
-    emoji: "⭐",
+    icon: "star",
     tileColors: { primary: "#5C35C9", secondary: "#311B92" },
     bgTop: "#020007",
     bgBottom: "#0d0826",
     particleColors: ["#FFD700", "#FFFACD", "#FFF8DC", "#FFEC8B", "#E6E6FA"],
-    hint: "Touche pour allumer des étoiles filantes ✨",
+    hint: "Touche pour allumer des étoiles filantes",
     noteHz: 440.0,
   },
   {
     id: "prairie",
     label: "Prairie",
-    emoji: "🌸",
+    icon: "flower",
     tileColors: { primary: "#E91E8C", secondary: "#880E4F" },
     bgTop: "#0f1f00",
     bgBottom: "#1a3300",
     particleColors: ["#FF69B4", "#FFB6C1", "#FF85C2", "#DDA0DD", "#EE82EE"],
-    hint: "Touche pour faire voler des pétales 🌸",
+    hint: "Touche pour faire voler des pétales",
     noteHz: 392.0,
   },
 ];
@@ -374,9 +375,7 @@ export function ScenesActivity({ reducedMotion, volume = 0.7, intensity }: Activ
               style={{ backgroundColor: scene.tileColors.primary }}
             >
               <div className="flex-1 flex items-center justify-center py-6">
-                <span className="text-[80px] leading-none select-none motion-safe:animate-[float_3s_ease-in-out_infinite]">
-                  {scene.emoji}
-                </span>
+                <Icon name={scene.icon} size={92} className="select-none motion-safe:animate-[float_3s_ease-in-out_infinite]" />
               </div>
               <div className="w-full px-4 py-4 text-center" style={{ backgroundColor: scene.tileColors.secondary }}>
                 <span className="font-masque font-bold text-white text-2xl">{scene.label}</span>
@@ -401,9 +400,10 @@ export function ScenesActivity({ reducedMotion, volume = 0.7, intensity }: Activ
           "font-masque font-bold text-white/70 text-lg px-6 py-2 rounded-full",
           "hover:text-white hover:bg-white/10 transition-all",
           "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white",
+          "flex items-center gap-2",
         ].join(" ")}
       >
-        ← Autres scènes
+        <Icon name="arrow-left" size={22} /> Autres scènes
       </button>
 
       {/* Indication discrète */}

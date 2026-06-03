@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { HomeButton } from "./HomeButton";
 import { SessionTimer } from "./SessionTimer";
+import { Icon } from "./Icon";
 import type { TimerPhase } from "../hooks/useSessionTimer";
 
 interface GameShellProps {
@@ -65,7 +66,7 @@ export function GameShell({
         ].join(" ")}
         aria-label="Ouvrir les réglages"
       >
-        <span className="text-3xl leading-none" role="img" aria-hidden>⚙️</span>
+        <Icon name="gear" size={32} />
         <span className="text-sm leading-tight">Réglages</span>
       </button>
     </div>

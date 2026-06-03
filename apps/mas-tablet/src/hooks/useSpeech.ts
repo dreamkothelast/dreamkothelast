@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { stripEmojis } from "./useOnlineTTS";
 
 /**
  * Synthèse vocale 100 % hors-ligne via l'API Web Speech (SpeechSynthesis).
@@ -119,7 +120,7 @@ export function useSpeech(volume = 1) {
       }
       window.speechSynthesis.cancel();
 
-      const u = new SpeechSynthesisUtterance(text);
+      const u = new SpeechSynthesisUtterance(stripEmojis(text));
       if (voiceRef.current) u.voice = voiceRef.current;
       u.lang = voiceRef.current?.lang ?? "fr-FR";
       u.rate = opts.rate ?? 0.95;

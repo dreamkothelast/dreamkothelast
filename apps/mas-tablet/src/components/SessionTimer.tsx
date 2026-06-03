@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import type { TimerPhase } from "../hooks/useSessionTimer";
 
 interface SessionTimerProps {
@@ -29,8 +30,10 @@ export function SessionTimer({ label, phase, isActive }: SessionTimerProps) {
       aria-live="off"
       aria-label={`Temps restant : ${label}`}
     >
-      <span className="text-base mr-1" role="img" aria-hidden>⏱</span>
-      {label}
+      <span className="inline-flex items-center gap-1.5">
+        <Icon name="clock" size={18} />
+        {label}
+      </span>
     </div>
   );
 }

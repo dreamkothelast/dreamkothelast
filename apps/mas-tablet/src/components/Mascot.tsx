@@ -152,11 +152,22 @@ export function Mascot({ state = "idle", size = 180, className = "" }: MascotPro
           </>
         )}
 
-        {/* Étoiles de célébration */}
+        {/* Étoiles de célébration — petites étoiles SVG (pas d'emoji) */}
         {state === "celebrate" && (
           <>
-            <text x="10" y="35" fontSize="14" className="animate-[float_1.5s_ease-in-out_infinite]">⭐</text>
-            <text x="75" y="30" fontSize="12" className="animate-[float_1.8s_ease-in-out_infinite_0.3s]">✨</text>
+            <path
+              className="animate-[float_1.5s_ease-in-out_infinite]"
+              fill="#FFC93C"
+              stroke="#F4A100"
+              strokeWidth="1"
+              strokeLinejoin="round"
+              d="M14 22 L17 30 L25 31 L19 36 L21 44 L14 39 L7 44 L9 36 L3 31 L11 30 Z"
+            />
+            <path
+              className="animate-[float_1.8s_ease-in-out_infinite_0.3s]"
+              fill="#FFE07A"
+              d="M82 20 C84 27 86 29 92 31 C86 33 84 35 82 42 C80 35 78 33 72 31 C78 29 80 27 82 20 Z"
+            />
           </>
         )}
       </svg>

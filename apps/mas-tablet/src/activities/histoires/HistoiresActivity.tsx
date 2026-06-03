@@ -2,20 +2,21 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { useSpeech } from "../../hooks/useSpeech";
 import { useOnlineTTS } from "../../hooks/useOnlineTTS";
+import { Icon } from "../../components/Icon";
 import voiceContent from "../../data/voiceContent.json";
 import type { ActivityProps } from "../../types";
 
 // ── Données des histoires (source unique partagée avec le générateur de voix) ──
 
 interface Page {
-  emoji: string;
+  icon: string;
   text: string;
 }
 
 interface Histoire {
   id: string;
   title: string;
-  emoji: string;
+  icon: string;
   primary: string;
   secondary: string;
   pages: Page[];
@@ -132,13 +133,13 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
           background: "linear-gradient(160deg, #4a148c 0%, #6a1b9a 40%, #7b1fa2 100%)",
         }}
       >
-        <div className="text-center pt-2">
-          <div className="text-6xl mb-2">📖</div>
+        <div className="text-center pt-2 flex flex-col items-center">
+          <Icon name="book" size={64} className="mb-2 drop-shadow-lg" />
           <h2 className="font-masque font-bold text-white text-4xl drop-shadow-lg">Histoires</h2>
           <p className="font-masque text-white/70 text-xl mt-1">
             {available
-              ? "Choisis une histoire à écouter 📖"
-              : "Choisis une histoire à lire 📖"}
+              ? "Choisis une histoire à écouter"
+              : "Choisis une histoire à lire"}
           </p>
         </div>
 
@@ -163,7 +164,7 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
                   borderRadius: "inherit",
                 }}
               />
-              <span className="relative text-5xl drop-shadow-lg flex-shrink-0" role="img">{s.emoji}</span>
+              <Icon name={s.icon} size={64} className="relative drop-shadow-lg flex-shrink-0" />
               <span className="relative font-masque font-bold text-white text-xl leading-tight">
                 {s.title}
               </span>
@@ -173,7 +174,7 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
 
         {!available && (
           <p className="font-masque text-white/50 text-base text-center max-w-[600px] pb-4">
-            💡 Pour activer la voix qui raconte, ajoutez une voix française dans
+            Pour activer la voix qui raconte, ajoutez une voix française dans
             Windows (Paramètres → Heure et langue → Voix).
           </p>
         )}
@@ -194,23 +195,23 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
       <div className="flex items-center justify-between px-8 py-4 gap-4">
         <button
           onClick={goBack}
-          className="font-masque font-bold text-brun text-xl px-6 py-3 rounded-[1.5rem] bg-white/70 hover:bg-white active:scale-95 transition-all min-w-[120px] min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
+          className="flex items-center gap-2 font-masque font-bold text-brun text-xl px-6 py-3 rounded-[1.5rem] bg-white/70 hover:bg-white active:scale-95 transition-all min-w-[120px] min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
         >
-          ← Retour
+          <Icon name="arrow-left" size={26} /> Retour
         </button>
 
         <div className="flex items-center gap-3">
-          <span className="text-3xl" role="img">{story.emoji}</span>
+          <Icon name={story.icon} size={40} />
           <span className="font-masque font-bold text-brun text-2xl">{story.title}</span>
         </div>
 
         {available ? (
           <button
             onClick={togglePause}
-            className="font-masque font-bold text-white text-xl px-6 py-3 rounded-[1.5rem] min-w-[120px] min-h-[56px] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
+            className="flex items-center justify-center gap-2 font-masque font-bold text-white text-xl px-6 py-3 rounded-[1.5rem] min-w-[120px] min-h-[56px] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
             style={{ backgroundColor: story.primary }}
           >
-            {paused ? "▶ Lire" : "⏸ Pause"}
+            <Icon name={paused ? "play" : "pause"} size={24} /> {paused ? "Lire" : "Pause"}
           </button>
         ) : (
           <div className="min-w-[120px]" />
@@ -221,11 +222,9 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
       <div className="flex-1 flex flex-col items-center justify-center px-12 gap-8">
         <div
           className={reducedMotion ? "" : "animate-[slide-up_0.5s_cubic-bezier(0.34,1.56,0.64,1)]"}
-          key={`emoji-${pageIdx}`}
+          key={`icon-${pageIdx}`}
         >
-          <span className="text-[clamp(7rem,18vw,14rem)] leading-none drop-shadow-2xl" role="img">
-            {page.emoji}
-          </span>
+          <Icon name={page.icon} size={220} className="drop-shadow-2xl" style={{ width: "clamp(7rem,18vw,14rem)", height: "auto" }} />
         </div>
 
         <p
@@ -245,10 +244,10 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         <button
           onClick={() => goPage(-1)}
           disabled={pageIdx === 0}
-          className="font-masque font-bold text-brun text-2xl w-[80px] h-[80px] rounded-full bg-white/80 hover:bg-white active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
+          className="flex items-center justify-center text-brun w-[80px] h-[80px] rounded-full bg-white/80 hover:bg-white active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
           aria-label="Page précédente"
         >
-          ←
+          <Icon name="arrow-left" size={38} />
         </button>
 
         {/* Points de progression */}
@@ -269,10 +268,10 @@ export function HistoiresActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         <button
           onClick={() => goPage(1)}
           disabled={pageIdx === story.pages.length - 1}
-          className="font-masque font-bold text-brun text-2xl w-[80px] h-[80px] rounded-full bg-white/80 hover:bg-white active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
+          className="flex items-center justify-center text-brun w-[80px] h-[80px] rounded-full bg-white/80 hover:bg-white active:scale-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
           aria-label="Page suivante"
         >
-          →
+          <Icon name="arrow-right" size={38} />
         </button>
       </div>
     </div>

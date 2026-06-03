@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { pickRandomImage } from "../../data/puzzleImages";
+import { Icon } from "../../components/Icon";
 import type { ActivityProps, Difficulty } from "../../types";
 import type { PuzzleImage } from "../../data/puzzleImages";
 
@@ -15,8 +16,8 @@ const PUZZLE_SIZE = 600;
 const SVG_VB = 300;
 
 const ENCOURAGEMENTS = [
-  "Bravo ! 🎉", "Super ! ⭐", "Bien joué ! 👏",
-  "Encore une ! 🌟", "Oui ! 🎵",
+  "Bravo !", "Super !", "Bien joué !",
+  "Encore une !", "Oui !",
 ];
 
 type Phase = "idle" | "preview" | "playing" | "solved" | "revealed";
@@ -300,8 +301,8 @@ export function PuzzleActivity({
   if (phase === "idle") {
     return (
       <div className="flex flex-col items-center justify-center w-full h-full gap-10 select-none">
-        <div className="text-center">
-          <div className="text-8xl mb-4">🧩</div>
+        <div className="text-center flex flex-col items-center">
+          <Icon name="puzzle" size={110} className="mb-4" />
           <h2 className="font-masque font-bold text-brun text-5xl">Puzzle Photo</h2>
           <p className="font-masque text-brun/60 text-2xl mt-2">
             {difficulty === "cause-effet"
@@ -322,7 +323,7 @@ export function PuzzleActivity({
           ].join(" ")}
           style={{ backgroundColor: "#1976D2" }}
         >
-          Commencer 🧩
+          Commencer
         </button>
       </div>
     );
@@ -332,7 +333,9 @@ export function PuzzleActivity({
   if (phase === "preview") {
     return (
       <div className="flex flex-col items-center justify-center w-full h-full gap-8 select-none">
-        <p className="font-masque font-bold text-brun text-4xl">Regarde bien… 👀</p>
+        <p className="font-masque font-bold text-brun text-4xl flex items-center gap-3">
+          <Icon name="eye" size={40} /> Regarde bien…
+        </p>
         <div
           className="rounded-3xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.4)]"
           style={{ width: PUZZLE_SIZE, height: PUZZLE_SIZE }}
@@ -356,8 +359,8 @@ export function PuzzleActivity({
     return (
       <div className="flex flex-col items-center justify-center w-full h-full gap-8 select-none">
         {phase === "solved" && (
-          <p className="font-masque font-bold text-brun text-3xl animate-bounce">
-            Bravo ! Appuie sur l'image pour découvrir son nom 👆
+          <p className="font-masque font-bold text-brun text-3xl animate-bounce flex items-center gap-2 justify-center">
+            Bravo ! Appuie sur l'image pour découvrir son nom <Icon name="hand" size={30} />
           </p>
         )}
         <button
@@ -393,9 +396,9 @@ export function PuzzleActivity({
         {phase === "solved" && (
           <button
             onClick={nextPuzzle}
-            className="font-masque font-bold text-white text-xl px-10 py-4 rounded-[1.5rem] bg-[#1976D2] hover:scale-105 active:scale-95 transition-all shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
+            className="flex items-center gap-2 font-masque font-bold text-white text-xl px-10 py-4 rounded-[1.5rem] bg-[#1976D2] hover:scale-105 active:scale-95 transition-all shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
           >
-            Autre puzzle 🧩
+            <Icon name="puzzle" size={26} /> Autre puzzle
           </button>
         )}
       </div>
@@ -412,10 +415,10 @@ export function PuzzleActivity({
 
       <p className="font-masque font-bold text-brun text-2xl text-center">
         {difficulty === "cause-effet"
-          ? "👆 Appuie sur chaque carreau pour révéler l'image !"
+          ? "Appuie sur chaque carreau pour révéler l'image !"
           : selectedPieceIdx !== null
-          ? "🎯 Maintenant, tap l'emplacement dans la grille"
-          : "✋ Choisis une pièce en bas, puis place-la dans la grille"}
+          ? "Maintenant, pose la pièce dans la grille"
+          : "Choisis une pièce en bas, puis place-la dans la grille"}
       </p>
 
       {/* ── Grille puzzle ── */}
@@ -473,7 +476,7 @@ export function PuzzleActivity({
                     style={{ display: "block", pointerEvents: "none" }}
                   />
                 ) : (
-                  <span role="img" aria-hidden>❓</span>
+                  <Icon name="question" size={Math.floor(Math.min(pieceW, pieceH) * 0.5)} className="text-white/90" />
                 )}
               </button>
             );
@@ -504,7 +507,7 @@ export function PuzzleActivity({
         <div className="w-full flex flex-col items-center gap-2">
           <p className="font-masque text-brun/60 text-lg">
             {solvedCount === totalPieces
-              ? "🎉 Toutes les pièces sont en place !"
+              ? "Toutes les pièces sont en place !"
               : `${solvedCount} / ${totalPieces} pièces placées`}
           </p>
           <div

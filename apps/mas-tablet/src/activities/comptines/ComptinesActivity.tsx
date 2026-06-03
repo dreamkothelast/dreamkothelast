@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { useSpeech } from "../../hooks/useSpeech";
-import { useOnlineTTS } from "../../hooks/useOnlineTTS";
+import { useOnlineTTS, stripEmojis } from "../../hooks/useOnlineTTS";
+import { Icon } from "../../components/Icon";
 import voiceContent from "../../data/voiceContent.json";
 import type { ActivityProps } from "../../types";
 
 interface Comptine {
   id: string;
   title: string;
-  emoji: string;
+  icon: string;
   primary: string;
   secondary: string;
   lines: string[];
@@ -37,9 +38,9 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
   const lineTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Words for current line (memoized to avoid repeated splits)
+  // Words for current line — strip emojis so they don't appear as karaoke tokens
   const currentWords = useMemo(
-    () => (current ? current.lines[lineIdx].split(/\s+/).filter(Boolean) : []),
+    () => (current ? stripEmojis(current.lines[lineIdx]).split(/\s+/).filter(Boolean) : []),
     [current, lineIdx]
   );
 
@@ -93,7 +94,7 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
 
   const startWordHighlight = useCallback((lineText: string) => {
     stopWordHighlight();
-    const words = lineText.split(/\s+/).filter(Boolean);
+    const words = stripEmojis(lineText).split(/\s+/).filter(Boolean);
     if (words.length === 0) return;
     setWordIdx(0);
     let i = 1;
@@ -145,7 +146,7 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
       lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), 550);
     };
     const timerFallback = () => {
-      const wc = text.split(/\s+/).filter(Boolean).length;
+      const wc = stripEmojis(text).split(/\s+/).filter(Boolean).length;
       lineTimerRef.current = setTimeout(() => goToNext(comptine, idx), Math.max(3000, wc * BEAT_MS + 600));
     };
     const voiceFallback = () => {
@@ -225,13 +226,13 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
           background: "linear-gradient(160deg, #1a237e 0%, #283593 40%, #3949ab 100%)",
         }}
       >
-        <div className="text-center pt-2">
-          <div className="text-6xl mb-2">🎵</div>
+        <div className="text-center pt-2 flex flex-col items-center">
+          <Icon name="music-note" size={64} className="mb-2 drop-shadow-lg" />
           <h2 className="font-masque font-bold text-white text-4xl drop-shadow-lg">Comptines</h2>
           <p className="font-masque text-white/70 text-xl mt-1">
             {available
-              ? "La voix chante avec toi ! Choisis une chanson 🎶"
-              : "Choisis une chanson — chante avec nous ! 🎶"}
+              ? "La voix chante avec toi ! Choisis une chanson"
+              : "Choisis une chanson — chante avec nous !"}
           </p>
         </div>
 
@@ -258,7 +259,7 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
                   borderRadius: "inherit",
                 }}
               />
-              <span className="relative text-5xl drop-shadow-lg" role="img">{c.emoji}</span>
+              <Icon name={c.icon} size={68} className="relative drop-shadow-lg" />
               <span className="relative font-masque font-bold text-white text-lg leading-tight text-center px-3">
                 {c.title}
               </span>
@@ -268,7 +269,7 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
 
         {!available && (
           <p className="font-masque text-white/50 text-base text-center max-w-[640px] pb-4">
-            💡 Pour activer la voix, ajoutez une voix française dans Windows
+            Pour activer la voix, ajoutez une voix française dans Windows
             (Paramètres → Heure et langue → Voix → Ajouter : Français France).
           </p>
         )}
@@ -292,22 +293,22 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
       <div className="flex items-center justify-between px-8 py-4 gap-4">
         <button
           onClick={goBack}
-          className="font-masque font-bold text-brun text-xl px-6 py-3 rounded-[1.5rem] bg-white/70 hover:bg-white active:scale-95 transition-all min-w-[120px] min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
+          className="flex items-center gap-2 font-masque font-bold text-brun text-xl px-6 py-3 rounded-[1.5rem] bg-white/70 hover:bg-white active:scale-95 transition-all min-w-[120px] min-h-[56px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brun"
         >
-          ← Retour
+          <Icon name="arrow-left" size={26} /> Retour
         </button>
 
         <div className="flex items-center gap-3">
-          <span className="text-3xl" role="img">{current.emoji}</span>
+          <Icon name={current.icon} size={40} />
           <span className="font-masque font-bold text-brun text-2xl">{current.title}</span>
         </div>
 
         <button
           onClick={togglePause}
-          className="font-masque font-bold text-white text-xl px-6 py-3 rounded-[1.5rem] min-w-[120px] min-h-[56px] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
+          className="flex items-center justify-center gap-2 font-masque font-bold text-white text-xl px-6 py-3 rounded-[1.5rem] min-w-[120px] min-h-[56px] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
           style={{ backgroundColor: current.primary }}
         >
-          {paused ? "▶ Jouer" : "⏸ Pause"}
+          <Icon name={paused ? "play" : "pause"} size={24} /> {paused ? "Jouer" : "Pause"}
         </button>
       </div>
 
@@ -352,25 +353,24 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
 
         {/* Musical note decorations */}
         {!paused && (
-          <div className="flex items-center gap-3 opacity-60">
-            {["🎵", "🎶", "🎵"].map((n, i) => (
-              <span
+          <div className="flex items-center gap-4 opacity-70">
+            {[0, 1, 2].map((i) => (
+              <Icon
                 key={i}
-                className="text-3xl"
+                name="music-note"
+                size={i === 1 ? 42 : 32}
                 style={{
                   animation: reducedMotion ? "none" : `float ${1.2 + i * 0.3}s ease-in-out infinite`,
                   animationDelay: `${i * 0.2}s`,
                 }}
-              >
-                {n}
-              </span>
+              />
             ))}
           </div>
         )}
 
         {!paused && (
-          <p className="font-masque text-brun/40 text-xl">
-            Touche pour passer à la suite →
+          <p className="font-masque text-brun/40 text-xl flex items-center gap-2">
+            Touche pour passer à la suite <Icon name="arrow-right" size={22} />
           </p>
         )}
       </button>

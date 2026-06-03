@@ -49,6 +49,15 @@ export const OnlineTTSConfig = {
 };
 
 // ── Utilitaires ────────────────────────────────────────────────────────────
+
+// Strip emojis before sending text to any TTS engine.
+// The bundled audio files are already generated with stripped text, and
+// their filenames are hashed from the ORIGINAL text — so playBundled() must
+// always receive the original string; only the fallback TTS paths call this.
+export function stripEmojis(text: string): string {
+  return text.replace(/\p{Extended_Pictographic}/gu, "").replace(/\s+/g, " ").trim();
+}
+
 function fnv32(str: string): string {
   let h = 0x811c9dc5 >>> 0;
   for (let i = 0; i < str.length; i++) {

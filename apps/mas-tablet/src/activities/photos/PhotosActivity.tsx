@@ -231,10 +231,10 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
   return (
     <div className="flex flex-col w-full h-full bg-gradient-to-b from-[#FFF8F0] to-[#FFF3E0] select-none">
       {/* En-tête */}
-      <div className="flex items-center justify-between px-8 py-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-8 py-4 sm:py-5">
         <div>
-          <h2 className="font-masque font-bold text-brun text-4xl inline-flex items-center gap-3"><Icon name="camera" size={40} /> Mes Photos</h2>
-          <p className="font-masque text-brun/50 text-lg mt-0.5">
+          <h2 className="font-masque font-bold text-brun text-2xl sm:text-4xl inline-flex items-center gap-2 sm:gap-3"><Icon name="camera" size={40} className="w-7 h-7 sm:w-10 sm:h-10" /> Mes Photos</h2>
+          <p className="font-masque text-brun/50 text-base sm:text-lg mt-0.5">
             {photos.length === 0
               ? "Ajoute les photos de tes proches"
               : `${photos.length} photo${photos.length > 1 ? "s" : ""}`}
@@ -246,8 +246,8 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
           onClick={() => fileInputRef.current?.click()}
           disabled={photos.length >= MAX_PHOTOS}
           className={[
-            "font-masque font-bold text-white text-2xl px-8 py-4 rounded-[1.5rem]",
-            "flex items-center gap-3 min-h-[72px]",
+            "font-masque font-bold text-white text-lg sm:text-2xl px-4 sm:px-8 py-3 sm:py-4 rounded-[1.5rem]",
+            "flex items-center gap-2 sm:gap-3 min-h-[56px] sm:min-h-[72px]",
             "shadow-[0_6px_20px_rgba(0,0,0,0.25)]",
             "transition-all duration-200 hover:scale-[1.03] active:scale-95",
             "focus-visible:outline-none focus-visible:ring-[6px] focus-visible:ring-brun",
@@ -255,7 +255,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
           ].join(" ")}
           style={{ backgroundColor: "#FF6F00" }}
         >
-          <Icon name="camera" size={32} />
+          <Icon name="camera" size={32} className="w-6 h-6 sm:w-8 sm:h-8" />
           Ajouter une photo
         </button>
 
@@ -298,7 +298,7 @@ export function PhotosActivity({ volume = 0.7, reducedMotion }: ActivityProps) {
       {/* Grille de photos */}
       {photos.length > 0 && (
         <div className="flex-1 overflow-y-auto px-8 pb-8">
-          <div className="grid grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
             {photos.map((photo, idx) => (
               <button
                 key={photo.id}

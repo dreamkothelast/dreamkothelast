@@ -227,23 +227,23 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
         }}
       >
         <div className="text-center pt-2 flex flex-col items-center">
-          <Icon name="music-note" size={64} className="mb-2 drop-shadow-lg" />
-          <h2 className="font-masque font-bold text-white text-4xl drop-shadow-lg">Comptines</h2>
-          <p className="font-masque text-white/70 text-xl mt-1">
+          <Icon name="music-note" size={64} className="w-12 h-12 sm:w-16 sm:h-16 mb-2 drop-shadow-lg" />
+          <h2 className="font-masque font-bold text-white text-2xl sm:text-4xl drop-shadow-lg">Comptines</h2>
+          <p className="font-masque text-white/70 text-base sm:text-xl mt-1 text-center px-4">
             {available
               ? "La voix chante avec toi ! Choisis une chanson"
               : "Choisis une chanson — chante avec nous !"}
           </p>
         </div>
 
-        <div className="grid grid-cols-4 gap-4 w-full max-w-[1300px] pb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-[1300px] pb-4">
           {COMPTINES.map((c) => (
             <button
               key={c.id}
               onClick={() => openComptine(c)}
               className={[
                 "flex flex-col items-center justify-center gap-2",
-                "min-h-[150px] rounded-[1.8rem] overflow-hidden relative",
+                "min-h-[110px] sm:min-h-[150px] rounded-[1.4rem] sm:rounded-[1.8rem] overflow-hidden relative",
                 "shadow-[0_6px_20px_rgba(0,0,0,0.4)]",
                 "cursor-pointer select-none",
                 "transition-all duration-200 hover:scale-[1.05] active:scale-95",
@@ -259,8 +259,8 @@ export function ComptinesActivity({ volume = 0.7, reducedMotion, onCelebrate }: 
                   borderRadius: "inherit",
                 }}
               />
-              <Icon name={c.icon} size={68} className="relative drop-shadow-lg" />
-              <span className="relative font-masque font-bold text-white text-lg leading-tight text-center px-3">
+              <Icon name={c.icon} size={68} className="w-12 h-12 sm:w-[68px] sm:h-[68px] relative drop-shadow-lg" />
+              <span className="relative font-masque font-bold text-white text-sm sm:text-lg leading-tight text-center px-2 sm:px-3">
                 {c.title}
               </span>
             </button>

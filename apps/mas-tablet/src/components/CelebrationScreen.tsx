@@ -98,19 +98,19 @@ export function CelebrationScreen({
       )}
 
       {/* Contenu centré */}
-      <div className="relative z-10 flex flex-col items-center gap-8 animate-[celebration_0.6s_cubic-bezier(0.34,1.56,0.64,1)]">
+      <div className="relative z-10 flex flex-col items-center gap-5 sm:gap-8 px-4 animate-[celebration_0.6s_cubic-bezier(0.34,1.56,0.64,1)]">
         <Mascot state="celebrate" size={220} />
 
         <div className="text-center">
-          <p className="font-masque font-bold text-brun text-6xl drop-shadow-sm">
+          <p className="font-masque font-bold text-brun text-4xl sm:text-6xl drop-shadow-sm">
             {message}
           </p>
-          <p className="font-masque text-brun/60 text-3xl mt-3">
+          <p className="font-masque text-brun/60 text-xl sm:text-3xl mt-3">
             C&apos;est terminé, tu as bien travaillé !
           </p>
         </div>
 
-        <div className="flex gap-6 mt-4">
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4">
           <BigButton
             onClick={onHome}
             color="bg-ciel"

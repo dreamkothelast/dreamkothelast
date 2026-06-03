@@ -353,7 +353,7 @@ export function MemoryActivity({
         >
           <span
             className={[
-              "font-masque font-bold text-corail text-6xl mas-text-shadow",
+              "font-masque font-bold text-corail text-4xl sm:text-6xl mas-text-shadow",
               reducedMotion ? "" : "animate-[celebration_0.6s_cubic-bezier(0.34,1.56,0.64,1)]",
             ].join(" ")}
           >

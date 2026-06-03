@@ -193,7 +193,7 @@ export function DouleurActivity({ volume = 0.7 }: ActivityProps) {
               {/* Visage */}
               <div className="w-20 h-20">{pl.face}</div>
               {/* Numéro */}
-              <span className="font-masque font-bold text-white text-5xl leading-none drop-shadow-md">
+              <span className="font-masque font-bold text-white text-3xl sm:text-5xl leading-none drop-shadow-md">
                 {pl.level}
               </span>
               {/* Label */}

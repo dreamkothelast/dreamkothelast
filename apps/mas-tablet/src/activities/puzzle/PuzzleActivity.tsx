@@ -303,7 +303,7 @@ export function PuzzleActivity({
       <div className="flex flex-col items-center justify-center w-full h-full gap-10 select-none">
         <div className="text-center flex flex-col items-center">
           <Icon name="puzzle" size={110} className="mb-4" />
-          <h2 className="font-masque font-bold text-brun text-5xl">Puzzle Photo</h2>
+          <h2 className="font-masque font-bold text-brun text-3xl sm:text-5xl">Puzzle Photo</h2>
           <p className="font-masque text-brun/60 text-2xl mt-2">
             {difficulty === "cause-effet"
               ? "Découvre l'image cachée"
@@ -387,7 +387,7 @@ export function PuzzleActivity({
         </button>
         {phase === "revealed" && (
           <div
-            className="font-masque font-bold text-brun text-7xl animate-[slide-up_0.5s_cubic-bezier(0.34,1.56,0.64,1)]"
+            className="font-masque font-bold text-brun text-4xl sm:text-7xl animate-[slide-up_0.5s_cubic-bezier(0.34,1.56,0.64,1)]"
             aria-live="polite"
           >
             {currentImage.label}
@@ -543,7 +543,7 @@ export function PuzzleActivity({
         >
           <span
             className={[
-              "font-masque font-bold text-corail text-6xl mas-text-shadow",
+              "font-masque font-bold text-corail text-4xl sm:text-6xl mas-text-shadow",
               reducedMotion ? "" : "animate-[celebration_0.5s_cubic-bezier(0.34,1.56,0.64,1)]",
             ].join(" ")}
           >

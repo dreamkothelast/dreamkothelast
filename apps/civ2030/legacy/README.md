@@ -1,34 +1,28 @@
 # /legacy — Référence World Sim 2030 (V2 god-sim)
 
-## ⚠️ Décision documentée (Phase 0)
+Référence du jeu d'origine dont Civilization 2030 hérite l'ADN. **Hors build et
+hors lint** (exclu dans `eslint.config.js`, jamais importé par `src/`) : c'est
+de la documentation, pas du code de production.
 
-Le brief de la Phase 0 demandait de **placer le code existant de la V2 god-sim dans
-`/legacy` comme référence**. Or, après audit complet du repo `dreamkothelast/dreamkothelast`
-(toutes branches : `claude/civ2030-phase0-setup-*`, `claude/create-parisian-merchant-org-*`,
-historique git complet), **le code de World Sim 2030 n'existe nulle part dans ce repo** :
-aucune occurrence de la palette `#F5F1E8`, des biomes, ou des événements géopolitiques.
-Le repo contient un monorepo sans rapport (`parislivr` : apps web/api/mas-tablet).
+## Contenu
 
-Plutôt que de bloquer la phase, la décision suivante a été prise :
+| Fichier | Rôle |
+| ------- | ---- |
+| `worldsim-v2.jsx` | **Le code source réel de la V2** (single-file React, fourni par Amine). Fait foi. |
+| `WORLDSIM_V2_SPEC.md` | Spec synchronisée avec ce code : palette/tokens, biomes et génération, simulation, 9 événements, 3 fins — plus le tableau des écarts V2 ↔ brief 4X et les décisions prises. |
+| `WORLDSIM_BRIEF_TECHNIQUE_V1.md` | Brief technique original (avril 2026) de la V1 envisagée sous Phaser (god-sim à agents Maslow). Historique des intentions : trophées, game over, événements WEF. |
 
-1. **`WORLDSIM_V2_SPEC.md`** (ci-contre) reconstitue formellement tout ce qui est connu
-   de la V2 à partir de sa description : palette, 9 biomes, génération par bruit
-   multi-fréquences, événements 2026-2030, 3 fins. C'est la **référence normative**
-   que la Phase 1 (biomes) et la Phase 6 (événements, fins) devront implémenter.
-2. Si tu retrouves le fichier source de la V2 (le single-file React), **dépose-le ici**
-   (`legacy/worldsim-v2.jsx` ou similaire) : il deviendra alors la référence prioritaire
-   et la spec sera mise à jour pour coller au code réel.
+## Historique de la décision
 
-## Ce que la Phase 1+ doit réutiliser de la V2
+En Phase 0, le code V2 était introuvable dans le repo : la spec avait été
+**reconstituée** depuis la description (avec marquage [connu]/[reconstitué]).
+Le code réel a été fourni ensuite et la spec a été **resynchronisée** — elle ne
+contient plus de reconstitution, le code fait foi.
 
-- La **palette crème** et la grammaire visuelle Mini Motorways (voir spec, §1).
-- La **logique de génération de biomes** : bruit multi-fréquences (élévation +
-  humidité), seuils par biome (voir spec, §2). À réimplémenter en TypeScript pur
-  dans `src/engine/map/`, de façon seedée et déterministe.
-- Le **ton et la matière des événements narratifs** 2026-2030 (voir spec, §3),
-  réinjectés en Phase 6 sous forme data-driven dans `src/data/events.ts`.
-- Le principe des **fins multiples** (voir spec, §4), généralisé en 4 conditions
-  de victoire 4X en Phase 6.
+## Ce que les phases suivantes y puisent
 
-Ce dossier est **hors build et hors lint** (exclu dans `eslint.config.js` et non
-importé par `src/`) : c'est de la documentation, pas du code de production.
+- **Phase 1** : design tokens et grammaire visuelle des tuiles (spec §1),
+  schéma de génération élévation/humidité/température (§2) — en le rendant
+  **seedable** (la V2 ne l'est pas, écart documenté §6).
+- **Phase 6** : matière des événements narratifs (§4) et des fins (§5) ;
+  les trophées/game over du brief V1 peuvent inspirer le score et les fins d'échec.

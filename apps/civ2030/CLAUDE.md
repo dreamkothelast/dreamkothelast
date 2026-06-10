@@ -73,7 +73,9 @@ pas verte.
 
 - **Tour 120 ≠ 2050** : la fin de partie est au **tour 100** (T4 2050) — voir
   GDD §1, note de cohérence. Ne pas réintroduire 120.
-- Le code de la V2 god-sim n'est **pas** dans le repo : la référence est la
-  spec `legacy/WORLDSIM_V2_SPEC.md`, pas un fichier source.
+- Le code de la V2 god-sim est dans `legacy/worldsim-v2.jsx` (il **fait foi**),
+  avec sa spec synchronisée `legacy/WORLDSIM_V2_SPEC.md`. Attention : la V2
+  n'est **pas seedable** et ses 9 biomes diffèrent de la liste 4X — les écarts
+  et décisions sont tabulés dans la spec §6.
 - En Phase 5, si l'IA déçoit : itérer sur les pondérations des archétypes
   (`src/data/personalities.ts`), ne pas réécrire l'architecture.

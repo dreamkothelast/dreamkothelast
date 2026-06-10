@@ -77,9 +77,13 @@ Un tour = un trimestre. Boucle joueur :
 
 - Grille **pointy-top, coordonnées axiales** (`q, r`), ~**40×25** tuiles,
   générée par seed (déterministe), continents connexes.
-- **9 biomes** hérités de la V2 (océan, côte, plaine, forêt, désert, montagne,
-  toundra, jungle + rivières en arêtes/tuiles) — génération par double bruit
-  multi-fréquences élévation × humidité (spec : `legacy/WORLDSIM_V2_SPEC.md`).
+- **9 biomes** : océan, côte, plaine, forêt, désert, montagne, toundra, jungle
+  + rivières en arêtes/tuiles — génération par bruit multi-fréquences
+  élévation × humidité × température héritée de la V2. Note : les 9 biomes de
+  la V2 réelle diffèrent légèrement (beach/meadow/deepForest au lieu de
+  toundra/jungle/rivières) ; la liste 4X ci-dessus prime, et beach/meadow/
+  deepForest deviennent des variantes visuelles (décision documentée :
+  `legacy/WORLDSIM_V2_SPEC.md` §6).
 - **Ressources stratégiques modernes** posées à la génération : **lithium**
   (batteries → unités drones, stockage), **uranium** (nucléaire), **pétrole**
   (économie sale mais immédiate), **terres rares** (compute, 6G), **terres
